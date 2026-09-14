@@ -1,0 +1,160 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/icon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <script>
+    (function () {
+      var choice = "system";
+      try { choice = localStorage.getItem("theme") || "system"; } catch (e) {}
+      var dark = choice === "dark" ||
+        (choice !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    })();
+  </script>
+  <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% if user.is_authenticated %}layout-app{% else %}layout-site{% endif %}">
+  {% if user.is_authenticated %}
+    {% include "partials/app_nav.html" %}
+  {% else %}
+    {% include "partials/site_header.html" %}
+  {% endif %}
+
+  <div class="page-wrap">
+    {% if plan_banner %}
+      <div class="container">
+        <a href="{% url 'billing:overview' %}" class="plan-banner plan-banner--{{ plan_banner.kind }}">
+          <span>{{ plan_banner.text }}</span><strong>{{ plan_banner.action }} &rarr;</strong>
+        </a>
+      </div>
+    {% endif %}
+    {% if messages %}
+      <div class="container messages">
+        {% for message in messages %}
+          <div class="alert{% if message.tags %} alert--{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block main %}
+      <main class="container page">
+        {% block content %}{% endblock %}
+      </main>
+    {% endblock %}
+
+    {% if not user.is_authenticated %}
+      {% include "partials/site_footer.html" %}
+    {% endif %}
+  </div>
+
+  {% if user.is_authenticated %}
+    {% include "partials/tabbar.html" %}
+  {% endif %}
+
+  {% if auth_panel and not hide_auth_dialog %}
+    <dialog id="auth-dialog" class="auth-dialog" aria-label="Sign in to {{ APP_NAME }}"
+            data-auto-open="{{ auth_panel.auto_open|yesno:'true,false' }}">
+      <div class="auth-dialog__body">
+        <button type="button" class="auth-dialog__close" data-auth-close aria-label="Close">&times;</button>
+        {% include "accounts/partials/auth_panel.html" with panel=auth_panel %}
+      </div>
+    </dialog>
+  {% endif %}
+
+  <script>
+    (function () {
+      var dialog = document.getElementById("auth-dialog");
+      var root = document.documentElement;
+      var darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+      function savedTheme() {
+        try { return localStorage.getItem("theme") || "system"; } catch (e) { return "system"; }
+      }
+      function applyTheme(choice) {
+        var dark = choice === "dark" || (choice !== "light" && darkQuery.matches);
+        root.dataset.theme = dark ? "dark" : "light";
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = dark ? "#0b0d12" : "#ffffff";
+        document.querySelectorAll("[data-theme-choice]").forEach(function (input) {
+          input.checked = input.value === choice;
+        });
+      }
+      function saveTheme(choice) {
+        try { localStorage.setItem("theme", choice); } catch (e) {}
+        applyTheme(choice);
+      }
+      applyTheme(savedTheme());
+      darkQuery.addEventListener("change", function () {
+        if (savedTheme() === "system") applyTheme("system");
+      });
+      document.addEventListener("change", function (event) {
+        if (event.target.matches("[data-theme-choice]")) saveTheme(event.target.value);
+      });
+
+      function focusFirstField(panel) {
+        var inputs = panel ? panel.querySelectorAll('input:not([type="hidden"])') : [];
+        for (var i = 0; i < inputs.length; i++) {
+          if (inputs[i].offsetParent !== null) { inputs[i].focus(); return; }
+        }
+      }
+
+      function setMode(panel, mode) {
+        if (!panel) return;
+        panel.dataset.mode = mode;
+        panel.querySelectorAll('[role="tab"]').forEach(function (tab) {
+          tab.setAttribute("aria-selected", String(tab.dataset.authMode === mode));
+        });
+        focusFirstField(panel);
+      }
+
+      function openDialog(mode) {
+        if (!dialog.open) dialog.showModal();
+        var panel = document.getElementById("auth-panel");
+        if (mode) setMode(panel, mode); else focusFirstField(panel);
+      }
+
+      document.addEventListener("click", function (event) {
+        if (event.target.closest("[data-theme-toggle]")) {
+          saveTheme(root.dataset.theme === "dark" ? "light" : "dark");
+          return;
+        }
+        var opener = event.target.closest("[data-auth-open]");
+        if (opener && dialog) {
+          event.preventDefault();
+          openDialog(opener.dataset.authOpen);
+          return;
+        }
+        var tab = event.target.closest("[data-auth-mode]");
+        if (tab) {
+          setMode(tab.closest(".auth-panel"), tab.dataset.authMode);
+          return;
+        }
+        var reveal = event.target.closest("[data-auth-reveal]");
+        if (reveal) {
+          var input = reveal.parentElement.querySelector("input");
+          var show = input.type === "password";
+          input.type = show ? "text" : "password";
+          reveal.textContent = show ? "Hide" : "Show";
+          reveal.setAttribute("aria-label", show ? "Hide password" : "Show password");
+          return;
+        }
+        // A click on the close button, or on the backdrop around the body.
+        if (dialog && (event.target.closest("[data-auth-close]") || event.target === dialog)) {
+          dialog.close();
+        }
+      });
+
+      if (dialog && dialog.dataset.autoOpen === "true") openDialog();
+    })();
+  </script>
+</body>
+</html>

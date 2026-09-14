@@ -1,0 +1,24 @@
+# --- Core ---
+Django==5.1.4
+djangorestframework==3.15.2
+django-environ==0.11.2
+dj-database-url==2.3.0
+psycopg[binary]==3.2.3
+
+# --- Async / background ---
+celery==5.4.0
+django-celery-beat==2.7.0
+redis==5.2.1
+
+# --- HTTP / crypto ---
+httpx==0.28.1
+cryptography==44.0.0
+
+# --- Billing ---
+
+# --- UI ---
+django-htmx==1.21.0
+
+# --- Serving ---
+gunicorn==23.0.0
+whitenoise==6.8.2

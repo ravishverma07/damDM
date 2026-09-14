@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<h1>Overview</h1>
+<p class="subtitle">Welcome back, {{ user.get_short_name }}.</p>
+
+{% with accounts=user.connected_accounts.all %}
+  <div class="card connect-card">
+    {% if accounts %}
+      <div class="card-head">
+        <h2>Connected accounts</h2>
+        <a href="{% url 'instagram:accounts' %}" class="text-sm">Manage</a>
+      </div>
+      <ul class="account-list">
+        {% for account in accounts %}
+          <li>
+            <a href="{% url 'instagram:account-detail' account.pk %}">@{{ account.username }}</a>
+            <span class="muted text-sm">{{ account.get_status_display }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <h2>Connect your Instagram</h2>
+      <p class="muted text-sm">
+        {{ APP_NAME }} works with Instagram Business and Creator accounts. Each Instagram
+        account can be connected to one {{ APP_NAME }} account.
+      </p>
+      <a href="{% url 'instagram:start' %}" class="btn btn--primary">Connect Instagram</a>
+    {% endif %}
+  </div>
+
+  {% if accounts and not automation_count %}
+    <div class="card cta-card">
+      <div>
+        <h2>Set up your first automation</h2>
+        <p class="muted text-sm">Auto-DM people who comment, message you or reply to your stories. It takes about a minute.</p>
+      </div>
+      <a href="{% url 'automations:new' %}" class="btn btn--primary">Create automation</a>
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="stat-grid">
+  <a class="stat stat--link" href="{% url 'automations:list' %}">
+    <p class="stat__label">Active automations</p>
+    <p class="stat__value{% if active_automations %} stat__value--on{% endif %}">{{ active_automations }}</p>
+  </a>
+  <div class="stat"><p class="stat__label">Comments this month</p><p class="stat__value">—</p></div>
+  <div class="stat"><p class="stat__label">DMs delivered</p><p class="stat__value">—</p></div>
+  <div class="stat"><p class="stat__label">Link clicks</p><p class="stat__value">—</p></div>
+</div>
+{% endblock %}

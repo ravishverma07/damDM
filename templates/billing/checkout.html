@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Set up UPI AutoPay · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="card card--narrow checkout">
+  <span class="checkout__icon">{% include "partials/icon.html" with name="card" size=26 %}</span>
+  <h1>{% if trial %}Start your free trial{% else %}Subscribe to {{ APP_NAME }} Pro{% endif %}</h1>
+  <p class="muted">
+    {% if trial %}
+      Approve UPI AutoPay for ₹99/month. <strong>Nothing is charged today</strong>; the first
+      payment is on {{ subscription.trial_ends_at|date:"j M Y" }}. Cancel any time before then.
+    {% else %}
+      Approve UPI AutoPay for ₹99/month. Your first payment is taken now.
+    {% endif %}
+  </p>
+  <button type="button" class="btn btn--primary btn--block btn--large" data-open-checkout>Continue to payment</button>
+  <a href="{% url 'billing:overview' %}" class="btn btn--block checkout__back">Back</a>
+
+  <form method="post" action="{{ confirm_url }}" data-confirm-form hidden>
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id">
+    <input type="hidden" name="razorpay_subscription_id">
+    <input type="hidden" name="razorpay_signature">
+  </form>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  (function () {
+    var form = document.querySelector("[data-confirm-form]");
+    var options = {
+      key: "{{ razorpay_key|escapejs }}",
+      subscription_id: "{{ subscription.provider_subscription_id|escapejs }}",
+      name: "{{ APP_NAME|escapejs }}",
+      description: "{% if trial %}14-day free trial, then ₹99/month{% else %}Pro · ₹99/month{% endif %}",
+      prefill: { name: "{{ user.full_name|escapejs }}", email: "{{ user.email|escapejs }}" },
+      theme: { color: "#dd2a7b" },
+      handler: function (response) {
+        form.elements.razorpay_payment_id.value = response.razorpay_payment_id;
+        form.elements.razorpay_subscription_id.value = response.razorpay_subscription_id;
+        form.elements.razorpay_signature.value = response.razorpay_signature;
+        form.submit();
+      },
+    };
+    function open() { new Razorpay(options).open(); }
+    document.querySelector("[data-open-checkout]").addEventListener("click", open);
+    open();
+  })();
+</script>
+{% endblock %}

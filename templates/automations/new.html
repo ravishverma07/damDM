@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}New automation · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<p class="breadcrumb text-sm"><a href="{% url 'automations:list' %}">&larr; Automations</a></p>
+<div class="page-head">
+  <div>
+    <h1>What do you want to automate?</h1>
+    <p class="subtitle">Pick a starting point. You can change everything before it goes live.</p>
+  </div>
+</div>
+{% include "automations/partials/recipe_grid.html" %}
+{% endblock %}

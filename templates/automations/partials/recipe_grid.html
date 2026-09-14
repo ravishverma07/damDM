@@ -1,0 +1,12 @@
+<div class="recipe-grid">
+  {% for recipe in recipes %}
+    <a class="recipe-card" href="{% url 'automations:create' recipe.slug %}">
+      <span class="recipe-card__top">
+        <span class="recipe-card__icon" aria-hidden="true">{{ recipe.icon }}</span>
+        {% if recipe.badge %}<span class="recipe-card__tag">{{ recipe.badge }}</span>{% endif %}
+      </span>
+      <span class="recipe-card__title">{{ recipe.title }}</span>
+      <span class="recipe-card__text">{{ recipe.description }}</span>
+    </a>
+  {% endfor %}
+</div>

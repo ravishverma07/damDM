@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Settings · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="settings">
+  <div class="page-head">
+    <div>
+      <h1>Settings</h1>
+      <p class="subtitle">Your profile and account.</p>
+    </div>
+  </div>
+
+  <section class="card settings-card">
+    <div class="settings-profile">
+      <span class="avatar avatar--large">{{ user.get_short_name|first|upper }}</span>
+      <div>
+        <p class="settings-profile__name">{{ user.get_full_name }}</p>
+        <p class="muted text-sm">{{ user.email }}</p>
+      </div>
+    </div>
+    <form method="post" novalidate>
+      {% include "partials/form.html" %}
+      <button type="submit" class="btn btn--primary">Save changes</button>
+    </form>
+  </section>
+
+  <section class="card settings-card">
+    <div class="settings-row settings-row--static">
+      {% include "partials/icon.html" with name="moon" size=20 %}<span>Appearance</span>
+    </div>
+    <div class="segmented segmented--full" role="radiogroup" aria-label="Appearance">
+      <label><input type="radio" name="theme" value="system" data-theme-choice><span>System</span></label>
+      <label><input type="radio" name="theme" value="light" data-theme-choice><span>Light</span></label>
+      <label><input type="radio" name="theme" value="dark" data-theme-choice><span>Dark</span></label>
+    </div>
+  </section>
+
+  <section class="card settings-list">
+    <a href="{% url 'billing:overview' %}" class="settings-row">
+      {% include "partials/icon.html" with name="card" size=20 %}<span>Plan &amp; billing</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+    <a href="{% url 'instagram:accounts' %}" class="settings-row">
+      {% include "partials/icon.html" with name="instagram" size=20 %}<span>Instagram accounts</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+    <a href="{% url 'accounts:password-reset' %}" class="settings-row">
+      {% include "partials/icon.html" with name="lock" size=20 %}<span>Change password</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+    <a href="{% url 'core:privacy' %}" class="settings-row">
+      {% include "partials/icon.html" with name="shield" size=20 %}<span>Privacy policy</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+    <a href="{% url 'core:terms' %}" class="settings-row">
+      {% include "partials/icon.html" with name="document" size=20 %}<span>Terms of service</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+  </section>
+
+  <section class="card settings-list">
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="settings-row">
+        {% include "partials/icon.html" with name="logout" size=20 %}<span>Log out</span>
+      </button>
+    </form>
+    <a href="{% url 'accounts:delete-account' %}" class="settings-row settings-row--danger">
+      {% include "partials/icon.html" with name="trash" size=20 %}<span>Delete account</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Plan & billing · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="settings">
+  <div class="page-head">
+    <div>
+      <h1>Plan &amp; billing</h1>
+      <p class="subtitle">One simple plan. Pay with UPI AutoPay, cancel any time.</p>
+    </div>
+  </div>
+
+  {% if has_access %}
+    <section class="card plan-status">
+      <div class="plan-status__head">
+        <div>
+          <p class="plan-status__name">{{ APP_NAME }} Pro</p>
+          <p class="muted text-sm">₹99/month · Unlimited DMs and automations</p>
+        </div>
+        {% if subscription.status == "trialing" %}
+          <span class="badge badge--active">Free trial</span>
+        {% elif subscription.status == "past_due" %}
+          <span class="badge badge--error">Payment due</span>
+        {% else %}
+          <span class="badge badge--active">Active</span>
+        {% endif %}
+      </div>
+
+      <dl class="account-meta">
+        {% if subscription.status == "trialing" %}
+          <div><dt>Trial left</dt><dd>{{ subscription.trial_days_left }} day{{ subscription.trial_days_left|pluralize }}</dd></div>
+          <div>
+            <dt>{% if subscription.cancel_at_period_end %}Access ends{% else %}First payment{% endif %}</dt>
+            <dd>{{ subscription.trial_ends_at|date:"j M Y" }}</dd>
+          </div>
+        {% else %}
+          <div>
+            <dt>{% if subscription.cancel_at_period_end %}Access ends{% else %}Renews{% endif %}</dt>
+            <dd>{{ subscription.current_period_end|date:"j M Y"|default:"—" }}</dd>
+          </div>
+        {% endif %}
+        <div><dt>Pay with</dt><dd>{% if subscription.payment_method %}{{ subscription.payment_method|upper }} AutoPay{% else %}AutoPay{% endif %}</dd></div>
+      </dl>
+
+      {% if subscription.status == "past_due" %}
+        <p class="alert alert--warning account-error">
+          Your last payment didn't go through. Razorpay retries automatically; keep enough balance
+          in the linked account to avoid pausing your automations.
+        </p>
+      {% endif %}
+
+      <div class="account-card__foot">
+        {% if subscription.cancel_at_period_end %}
+          <p class="muted text-sm">Cancelled. You won't be charged again.</p>
+        {% else %}
+          <p class="muted text-sm">Your bank sends a reminder before each AutoPay charge.</p>
+          <form method="post" action="{% url 'billing:cancel' %}" onsubmit="return confirm('Cancel your plan? Automations stop when the current period ends.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--danger">Cancel plan</button>
+          </form>
+        {% endif %}
+      </div>
+    </section>
+
+  {% else %}
+    <section class="card pricing-card">
+      {% if eligibility.eligible %}<span class="pricing-card__tag">14 days free</span>{% endif %}
+      <p class="pricing-card__name">{{ APP_NAME }} Pro</p>
+      <p class="pricing-card__price">₹99<span>/month</span></p>
+      <ul class="pricing-card__features">
+        <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited DMs and replies</li>
+        <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited automations</li>
+        <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Follow to unlock, story replies, DM keywords</li>
+        <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Cancel any time</li>
+      </ul>
+
+      {% if eligibility.reason == "no_instagram" %}
+        <p class="pricing-card__note">{{ eligibility.message }}</p>
+        <a href="{% url 'instagram:accounts' %}" class="btn btn--primary btn--block btn--large">Connect Instagram</a>
+      {% else %}
+        <form method="post" action="{% url 'billing:start' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--glow btn--block btn--large">
+            {% if eligibility.eligible %}Start 14-day free trial{% else %}Subscribe for ₹99/month{% endif %}
+          </button>
+        </form>
+        {% if eligibility.eligible %}
+          <p class="pricing-card__note">
+            ₹0 today. You'll approve UPI AutoPay for ₹99/month, starting after 14 days.
+            Cancel before then and you won't be charged.
+          </p>
+        {% else %}
+          <p class="pricing-card__note">{{ eligibility.message }} You can still subscribe; the first payment is taken today.</p>
+        {% endif %}
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if payments %}
+    <section class="card settings-list">
+      <p class="settings-list__title">Payment history</p>
+      {% for payment in payments %}
+        <div class="settings-row settings-row--static">
+          {% include "partials/icon.html" with name="card" size=20 %}
+          <span>{{ payment.paid_at|default:payment.created_at|date:"j M Y" }} · {{ payment.method|upper|default:"AutoPay" }}</span>
+          <strong>₹{{ payment.amount_display|floatformat:0 }}</strong>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

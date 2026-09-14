@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Instagram accounts · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Instagram accounts</h1>
+    <p class="subtitle">Each Instagram account can be connected to one {{ APP_NAME }} account.</p>
+  </div>
+  {% if accounts %}
+    <a href="{% url 'instagram:start' %}" class="btn btn--primary">Connect account</a>
+  {% endif %}
+</div>
+
+{% for account in accounts %}
+  <section class="card account-card">
+    {% include "instagram/partials/account_summary.html" with post_count=account.post_count show_posts_link=True %}
+  </section>
+{% empty %}
+  <div class="empty-state">
+    <h2>No Instagram account connected</h2>
+    <p>Connect an Instagram Business or Creator account to start automating replies.</p>
+    <a href="{% url 'instagram:start' %}" class="btn btn--primary">Connect Instagram</a>
+  </div>
+{% endfor %}
+{% endblock %}

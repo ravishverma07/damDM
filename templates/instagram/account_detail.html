@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}@{{ account.username }} · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<p class="breadcrumb text-sm"><a href="{% url 'instagram:accounts' %}">&larr; Instagram accounts</a></p>
+
+<section class="card account-card">
+  {% include "instagram/partials/account_summary.html" %}
+</section>
+
+<div class="section-head">
+  <h2>Posts and Reels</h2>
+  <span class="muted text-sm">{% if post_count > posts|length %}Latest {{ posts|length }} of {{ post_count }}{% else %}{{ post_count }} synced{% endif %}</span>
+</div>
+
+<div class="post-grid">
+  {% for post in posts %}
+    <a class="post-tile" href="{{ post.permalink|default:'#' }}" target="_blank" rel="noopener noreferrer"
+       title="{{ post.caption|truncatechars:120 }}">
+      {% if post.thumbnail_url %}
+        <img src="{{ post.thumbnail_url }}" alt="" loading="lazy" referrerpolicy="no-referrer">
+      {% else %}
+        <span class="post-tile__caption">{{ post.caption|truncatechars:80|default:"No caption" }}</span>
+      {% endif %}
+      <span class="post-tile__type">{{ post.get_product_type_display }}</span>
+      <span class="post-tile__stats">{{ post.comments_count }} comment{{ post.comments_count|pluralize }}</span>
+    </a>
+  {% empty %}
+    <div class="empty-state">
+      No posts synced yet.{% if account.is_connected %} Use <strong>Sync now</strong> to fetch them.{% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

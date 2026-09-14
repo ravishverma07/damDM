@@ -1,0 +1,15 @@
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <a href="{% url 'core:landing' %}" class="brand brand--small">
+      {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
+    </a>
+    <nav class="site-footer__links" aria-label="Legal">
+      <a href="{% url 'core:privacy' %}">Privacy</a>
+      <a href="{% url 'core:terms' %}">Terms</a>
+      <a href="{% url 'core:data-deletion' %}">Data deletion</a>
+    </nav>
+    <p class="site-footer__legal">
+      &copy; {% now "Y" %} {{ APP_NAME }}. Not affiliated with, endorsed by, or sponsored by Instagram or Meta.
+    </p>
+  </div>
+</footer>

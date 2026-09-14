@@ -1,0 +1,15 @@
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href="{% url 'core:landing' %}" class="brand">
+      {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
+    </a>
+    <nav class="site-nav" aria-label="Account">
+      <button type="button" class="icon-button theme-toggle" data-theme-toggle aria-label="Switch light or dark mode">
+        <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>
+        <span class="theme-toggle__sun">{% include "partials/icon.html" with name="sun" size=20 %}</span>
+      </button>
+      <a href="{% url 'accounts:login' %}" class="site-nav__link" data-auth-open="signin">Log in</a>
+      <a href="{% url 'accounts:register' %}" class="btn btn--primary btn--small" data-auth-open="signup">Get started</a>
+    </nav>
+  </div>
+</header>

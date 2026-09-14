@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Data Deletion · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1>Data deletion instructions</h1>
+  <ol>
+    <li>Log in to {{ APP_NAME }} and open <strong>Settings</strong>.</li>
+    <li>Disconnect any Instagram accounts — this deletes the stored access token immediately.</li>
+    <li>Choose <strong>Delete account</strong> to erase your profile, automations and logs.</li>
+    <li>
+      You can also remove {{ APP_NAME }} from Instagram under
+      <em>Settings → Website permissions → Apps and websites</em>. We honour Meta's
+      deauthorize callback and delete the connection automatically.
+    </li>
+  </ol>
+  <p>
+    Prefer email? Write to <a href="mailto:privacy@dammai.in">privacy@dammai.in</a>
+    and we will delete your data within 30 days.
+  </p>
+</article>
+{% endblock %}

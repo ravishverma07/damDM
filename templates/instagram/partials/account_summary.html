@@ -1,0 +1,59 @@
+{% comment %}
+  Header, facts and actions for one connected account.
+  Expects `account` and `post_count`.
+{% endcomment %}
+{% load humanize %}
+<div class="account-head">
+  {% if account.profile_picture_url %}
+    <img class="account-avatar" src="{{ account.profile_picture_url }}" alt="" referrerpolicy="no-referrer">
+  {% else %}
+    <div class="account-avatar account-avatar--initial" aria-hidden="true">{{ account.username|first|upper|default:"@" }}</div>
+  {% endif %}
+  <div class="account-head__text">
+    <p class="account-head__name">@{{ account.username|default:account.external_account_id }}</p>
+    <p class="muted text-sm">
+      {% if account.display_name %}{{ account.display_name }} · {% endif %}{% if account.followers_count is not None %}{{ account.followers_count|intcomma }} follower{{ account.followers_count|pluralize }} · {% endif %}{{ account.get_account_type_display }}
+    </p>
+  </div>
+  <span class="badge badge--{{ account.status }}">{{ account.get_status_display }}</span>
+</div>
+
+<dl class="account-meta">
+  <div><dt>Posts synced</dt><dd>{{ post_count|intcomma }}</dd></div>
+  <div>
+    <dt>Last synced</dt>
+    <dd>{% if account.last_synced_at %}{{ account.last_synced_at|naturaltime|capfirst }}{% else %}Not yet{% endif %}</dd>
+  </div>
+  <div>
+    <dt>Token expires</dt>
+    <dd>{% if account.is_claimed and account.token_expires_at %}{{ account.token_expires_at|date:"j M Y" }}{% else %}—{% endif %}</dd>
+  </div>
+  <div><dt>Connected</dt><dd>{{ account.connected_at|date:"j M Y" }}</dd></div>
+</dl>
+
+{% if account.last_error %}
+  <p class="alert alert--warning account-error">{{ account.last_error|truncatechars:240 }}</p>
+{% endif %}
+
+<div class="account-card__foot">
+  {% if show_posts_link %}
+    <a href="{% url 'instagram:account-detail' account.pk %}" class="text-sm">View posts &rarr;</a>
+  {% endif %}
+  <div class="account-actions">
+    {% if account.is_connected %}
+      <form method="post" action="{% url 'instagram:account-sync' account.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn">Sync now</button>
+      </form>
+    {% else %}
+      <a href="{% url 'instagram:start' %}" class="btn btn--primary">Reconnect</a>
+    {% endif %}
+    {% if account.is_claimed %}
+      <form method="post" action="{% url 'instagram:account-disconnect' account.pk %}"
+            onsubmit="return confirm('Disconnect @{{ account.username|escapejs }}? Its automations will be paused.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--danger">Disconnect</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

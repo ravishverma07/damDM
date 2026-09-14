@@ -1,0 +1,16 @@
+{% comment %}One sign-in form field. Pass `field`; `forgot=True` adds the reset link.{% endcomment %}
+<div class="auth-field{% if field.errors %} auth-field--error{% endif %}">
+  <div class="auth-field__label">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% if forgot %}<a href="{% url 'accounts:password-reset' %}">Forgot password?</a>{% endif %}
+  </div>
+  {% if field.field.widget.input_type == "password" %}
+    <div class="auth-field__control auth-field__control--password">
+      {{ field }}
+      <button type="button" class="auth-reveal" data-auth-reveal aria-label="Show password">Show</button>
+    </div>
+  {% else %}
+    <div class="auth-field__control">{{ field }}</div>
+  {% endif %}
+  {% for error in field.errors %}<p class="auth-field__error">{{ error }}</p>{% endfor %}
+</div>

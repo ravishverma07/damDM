@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ APP_NAME }} — Auto-reply to Instagram comments and DMs{% endblock %}
+{% block main %}
+<main class="landing">
+  <section class="hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Instagram automation</p>
+        <h1 class="hero__title">Turn every comment into a <span class="text-gradient">conversation</span></h1>
+        <p class="hero__lead">
+          Someone comments “LINK” on your Reel. {{ APP_NAME }} replies publicly and slides into
+          their DMs with your link in seconds, day and night.
+        </p>
+        <div class="hero__actions">
+          <a href="{% url 'accounts:register' %}" class="btn btn--large btn--glow" data-auth-open="signup">Start 14-day free trial</a>
+          <a href="#how-it-works" class="btn btn--large btn--ghost">See how it works</a>
+        </div>
+        <ul class="hero__trust">
+          <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}Official Instagram API</li>
+          <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}No password needed</li>
+          <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}14 days free, then ₹99/month</li>
+        </ul>
+      </div>
+      <div class="hero__demo">
+        {% include "core/partials/demo_phone.html" %}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <p class="eyebrow eyebrow--center">How it works</p>
+      <h2 class="section__title">Live in under a minute</h2>
+      <ol class="steps">
+        <li class="step-card">
+          <span class="step-card__num">1</span>
+          <h3>Connect Instagram</h3>
+          <p>Log in with your Instagram Business or Creator account. No passwords, no scraping.</p>
+        </li>
+        <li class="step-card">
+          <span class="step-card__num">2</span>
+          <h3>Pick a template</h3>
+          <p>Comment to DM, follow to unlock, DM keywords or story replies. Edit the words to sound like you.</p>
+        </li>
+        <li class="step-card">
+          <span class="step-card__num">3</span>
+          <h3>Go live</h3>
+          <p>{{ APP_NAME }} answers every matching comment and message while you create.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--tinted">
+    <div class="container">
+      <p class="eyebrow eyebrow--center">Everything you need</p>
+      <h2 class="section__title">Your DMs, working while you sleep</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="message" %}</span>
+          <h3>Comment to DM</h3>
+          <p>Reply to any comment keyword with a DM that carries your link.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="lock" %}</span>
+          <h3>Follow to unlock</h3>
+          <p>Send the link only after they follow you, and grow with every post.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="reply" %}</span>
+          <h3>Public replies</h3>
+          <p>Rotating replies under comments show everyone your offer is real.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="automations" %}</span>
+          <h3>DM keywords</h3>
+          <p>Answer PRICE, LINK or any keyword the moment it lands in your inbox.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="story" %}</span>
+          <h3>Stories too</h3>
+          <p>Thank people who reply to or mention your stories, automatically.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-card__icon">{% include "partials/icon.html" with name="shield" %}</span>
+          <h3>Safe by design</h3>
+          <p>Built on Meta's official Instagram API, so your account stays in good standing.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="pricing">
+    <div class="container">
+      <p class="eyebrow eyebrow--center">Pricing</p>
+      <h2 class="section__title">One plan. Everything unlimited.</h2>
+      <div class="card pricing-card pricing-card--landing">
+        <span class="pricing-card__tag">14 days free</span>
+        <p class="pricing-card__name">{{ APP_NAME }} Pro</p>
+        <p class="pricing-card__price">₹99<span>/month</span></p>
+        <ul class="pricing-card__features">
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited DMs and replies</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited automations</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Pay with UPI AutoPay</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Cancel any time</li>
+        </ul>
+        <a href="{% url 'accounts:register' %}" class="btn btn--glow btn--block btn--large" data-auth-open="signup">Start 14-day free trial</a>
+        <p class="pricing-card__note">₹0 today. One free trial per Instagram account.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="cta-banner">
+        <h2>Ready to automate your DMs?</h2>
+        <p>Try everything free for 14 days, then just ₹99/month.</p>
+        <a href="{% url 'accounts:register' %}" class="btn btn--large btn--light" data-auth-open="signup">Start free trial</a>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="{% static 'js/landing-demo.js' %}" defer></script>
+{% endblock %}

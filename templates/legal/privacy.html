@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1>Privacy Policy</h1>
+  <p class="text-sm muted">Placeholder — replace with reviewed legal copy before launch.</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li>Your email address and name.</li>
+    <li>Your Instagram professional account ID, username and profile picture URL.</li>
+    <li>An encrypted Instagram access token, used only to call Meta's official APIs.</li>
+    <li>Comments and messages processed by your automations.</li>
+  </ul>
+
+  <h2>What we never collect</h2>
+  <ul>
+    <li>Instagram passwords. We never ask for them and cannot accept them.</li>
+    <li>Raw IP addresses for link clicks — only a salted hash.</li>
+  </ul>
+
+  <h2>Deleting your data</h2>
+  <p>See <a href="{% url 'core:data-deletion' %}">data deletion</a>.</p>
+</article>
+{% endblock %}

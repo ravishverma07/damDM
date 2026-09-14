@@ -1,0 +1,97 @@
+{% load static %}{% comment %}
+  Every way in, in one panel: email sign in / sign up, then Google and Instagram.
+  Shown in the popup, inline on the login and register pages, and returned
+  alone to HTMX form posts so errors appear without leaving the popup.
+  Elements tagged data-show="signin signup" are visible only in those modes.
+  Expects `panel` (see apps.accounts.services.auth.build_auth_panel).
+{% endcomment %}
+<div id="auth-panel" class="auth-panel" data-mode="{{ panel.mode }}">
+  <div class="auth-head">
+    <img class="auth-logo" src="{% static 'img/logo.png' %}" alt="" width="52" height="52">
+    <h2 class="auth-title">
+      <span data-show="signin">Welcome back</span>
+      <span data-show="signup">Create your account</span>
+      {% if panel.pending_instagram %}<span data-show="finish">One last step</span>{% endif %}
+    </h2>
+    <p class="auth-subtitle">
+      <span data-show="signin">Sign in to continue to {{ APP_NAME }}</span>
+      <span data-show="signup">Start turning comments into conversations</span>
+      {% if panel.pending_instagram %}
+        <span data-show="finish">Add your email to finish setting up <strong>@{{ panel.pending_instagram }}</strong></span>
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="auth-tabs" role="tablist" data-show="signin signup">
+    <button type="button" role="tab" data-auth-mode="signin" aria-selected="{% if panel.mode == 'signup' %}false{% else %}true{% endif %}">Sign in</button>
+    <button type="button" role="tab" data-auth-mode="signup" aria-selected="{% if panel.mode == 'signup' %}true{% else %}false{% endif %}">Sign up</button>
+  </div>
+
+  {% if panel.pending_instagram %}
+    <p class="auth-note" data-show="signin signup">
+      We'll connect <strong>@{{ panel.pending_instagram }}</strong> once you're in.
+    </p>
+  {% endif %}
+
+  <form data-show="signin" method="post" action="{% url 'accounts:login' %}"
+        hx-post="{% url 'accounts:login' %}" hx-target="#auth-panel" hx-swap="outerHTML" novalidate>
+    {% csrf_token %}
+    {% if panel.login_form.non_field_errors %}<div class="auth-alert">{{ panel.login_form.non_field_errors }}</div>{% endif %}
+    {% include "accounts/partials/auth_field.html" with field=panel.login_form.username %}
+    {% include "accounts/partials/auth_field.html" with field=panel.login_form.password forgot=True %}
+    <input type="hidden" name="next" value="{{ panel.next }}">
+    <button type="submit" class="btn btn--primary btn--block auth-submit">Sign in</button>
+  </form>
+
+  <form data-show="signup" method="post" action="{% url 'accounts:register' %}"
+        hx-post="{% url 'accounts:register' %}" hx-target="#auth-panel" hx-swap="outerHTML" novalidate>
+    {% csrf_token %}
+    {% if panel.signup_form.non_field_errors %}<div class="auth-alert">{{ panel.signup_form.non_field_errors }}</div>{% endif %}
+    {% include "accounts/partials/auth_field.html" with field=panel.signup_form.email %}
+    {% include "accounts/partials/auth_field.html" with field=panel.signup_form.password1 %}
+    {% include "accounts/partials/auth_field.html" with field=panel.signup_form.password2 %}
+    <input type="hidden" name="next" value="{{ panel.next }}">
+    <button type="submit" class="btn btn--primary btn--block auth-submit">Create account</button>
+  </form>
+
+  {% if panel.pending_instagram %}
+    <form data-show="finish" method="post" action="{% url 'accounts:instagram-finish' %}"
+          hx-post="{% url 'accounts:instagram-finish' %}" hx-target="#auth-panel" hx-swap="outerHTML" novalidate>
+      {% csrf_token %}
+      {% include "accounts/partials/auth_field.html" with field=panel.finish_form.email %}
+      <input type="hidden" name="next" value="{{ panel.next }}">
+      <button type="submit" class="btn btn--primary btn--block auth-submit">Continue</button>
+    </form>
+  {% endif %}
+
+  <div data-show="signin signup">
+    <div class="auth-divider">or</div>
+    <div class="auth-social">
+      <a class="btn btn--social" href="{% url 'accounts:google-start' %}{% if panel.next %}?next={{ panel.next|urlencode }}{% endif %}">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continue with Google
+      </a>
+      <a class="btn btn--social" href="{% url 'instagram:start' %}{% if panel.next %}?next={{ panel.next|urlencode }}{% endif %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="auth-ig-gradient" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FEDA75"/><stop offset=".3" stop-color="#FA7E1E"/><stop offset=".6" stop-color="#D62976"/><stop offset=".85" stop-color="#962FBF"/><stop offset="1" stop-color="#4F5BD5"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#auth-ig-gradient)"/><rect x="6.5" y="6.5" width="11" height="11" rx="5.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="17.1" cy="6.9" r="1.1" fill="#fff"/></svg>
+        Continue with Instagram
+      </a>
+    </div>
+  </div>
+
+  <p class="auth-switch" data-show="signin">
+    Don't have an account? <button type="button" class="auth-link" data-auth-mode="signup">Sign up</button>
+  </p>
+  <p class="auth-switch" data-show="signup">
+    Already have an account? <button type="button" class="auth-link" data-auth-mode="signin">Sign in</button>
+  </p>
+  {% if panel.pending_instagram %}
+    <p class="auth-switch" data-show="finish">
+      Already have an account? <button type="button" class="auth-link" data-auth-mode="signin">Sign in</button>
+    </p>
+  {% endif %}
+
+  <p class="auth-legal" data-show="signin signup">
+    By continuing, you agree to our <a href="{% url 'core:terms' %}">Terms</a> and
+    <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
+  </p>
+</div>

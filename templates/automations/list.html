@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Automations · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Automations</h1>
+    <p class="subtitle">Reply to comments, DMs and stories automatically.</p>
+  </div>
+  {% if automations and has_accounts %}
+    <a href="{% url 'automations:new' %}" class="btn btn--primary">New automation</a>
+  {% endif %}
+</div>
+
+{% if not has_accounts %}
+  <div class="alert alert--warning">
+    Connect an Instagram account before creating automations.
+    <a href="{% url 'instagram:accounts' %}">Connect Instagram &rarr;</a>
+  </div>
+{% endif %}
+
+{% if automations %}
+  <div class="automation-list">
+    {% for automation in automations %}
+      <article class="automation-row">
+        <div class="automation-row__main">
+          <a href="{% url 'automations:edit' automation.pk %}" class="automation-row__name">{{ automation.name }}</a>
+          <p class="automation-row__trigger">
+            {{ automation.summary.trigger }}<span class="muted"> · @{{ automation.account.username }}</span>
+          </p>
+          <div class="action-chips">
+            {% for action in automation.summary.actions %}<span class="action-chip">{{ action }}</span>{% endfor %}
+          </div>
+        </div>
+
+        <div class="automation-row__stats">
+          <strong>{{ automation.runs_count }}</strong>
+          {{ automation.runs_count|pluralize:"person,people" }} reached
+        </div>
+
+        <div class="automation-row__actions">
+          <form method="post" action="{% url 'automations:status' automation.pk %}">
+            {% csrf_token %}
+            {% if automation.is_active %}
+              <input type="hidden" name="action" value="pause">
+              <button type="submit" class="status-toggle status-toggle--active" title="Pause">Live</button>
+            {% else %}
+              <input type="hidden" name="action" value="activate">
+              <button type="submit" class="status-toggle" title="Turn on">{{ automation.get_status_display }}</button>
+            {% endif %}
+          </form>
+          <a href="{% url 'automations:edit' automation.pk %}" class="btn">Edit</a>
+          <form method="post" action="{% url 'automations:delete' automation.pk %}"
+                onsubmit="return confirm('Delete “{{ automation.name|escapejs }}”? This can’t be undone.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--icon" aria-label="Delete {{ automation.name }}" title="Delete">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+            </button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% elif has_accounts %}
+  <div class="empty-hero">
+    <h2>Create your first automation</h2>
+    <p class="muted">Pick a starting point. You can change everything before it goes live.</p>
+  </div>
+  {% include "automations/partials/recipe_grid.html" %}
+{% endif %}
+{% endblock %}

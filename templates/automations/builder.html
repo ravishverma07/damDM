@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if automation %}Edit automation{% else %}New automation{% endif %} · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<p class="breadcrumb text-sm">
+  <a href="{% if automation %}{% url 'automations:list' %}{% else %}{% url 'automations:new' %}{% endif %}">&larr; {% if automation %}Automations{% else %}Choose a different starting point{% endif %}</a>
+</p>
+
+<form method="post" class="builder" data-builder data-account-username="{{ account_username }}" novalidate>
+  {% csrf_token %}
+
+  <div class="builder__form">
+    <div class="builder-name">
+      {{ form.name }}
+      {{ form.name.errors }}
+      {% if form.account.is_hidden %}
+        {{ form.account }}
+        <p class="builder-name__account">Runs on <strong>@{{ account_username }}</strong></p>
+      {% else %}
+        <p class="builder-name__account"><label for="{{ form.account.id_for_label }}">Runs on</label> {{ form.account }}</p>
+      {% endif %}
+    </div>
+
+    {% if form.non_field_errors %}<div class="alert alert--error">{{ form.non_field_errors }}</div>{% endif %}
+    {% if form.errors %}<div class="alert alert--error">Please fix the highlighted fields below.</div>{% endif %}
+
+    {# 1. Trigger #}
+    <section class="builder-section">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div>
+          <h2 class="builder-section__title">When someone&hellip;</h2>
+          <p class="builder-section__hint">Choose what starts this automation.</p>
+        </div>
+      </header>
+      <div class="choice-grid">
+        {% for option in trigger_options %}
+          <label class="choice-card">
+            <input type="radio" name="trigger_type" value="{{ option.value }}"{% if form.trigger_type.value == option.value %} checked{% endif %}>
+            <span class="choice-card__icon" aria-hidden="true">{{ option.icon }}</span>
+            <span>
+              <span class="choice-card__title">{{ option.label }}</span>
+              <span class="choice-card__hint">{{ option.hint }}</span>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+      {{ form.trigger_type.errors }}
+    </section>
+
+    {# 2. Posts #}
+    <section class="builder-section" data-show-for="comment">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div>
+          <h2 class="builder-section__title">On which post?</h2>
+          <p class="builder-section__hint">Watch every post, or only the ones you pick.</p>
+        </div>
+      </header>
+      <div class="segmented" role="radiogroup" aria-label="Posts">
+        {% for option in scope_options %}
+          <label>
+            <input type="radio" name="post_scope" value="{{ option.value }}"{% if form.post_scope.value == option.value %} checked{% endif %}>
+            <span>{{ option.label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <p class="builder-note" data-show-for-scope="next_post">It will start working on the next post or Reel you publish.</p>
+      <div data-show-for-scope="specific_posts">
+        {% if posts %}
+          <div class="post-picker">
+            {% for post in posts %}
+              <label class="post-option" data-account="{{ post.account_id }}" title="{{ post.caption|truncatechars:100 }}">
+                <input type="checkbox" name="posts" value="{{ post.pk }}"{% if post.pk|stringformat:"s" in selected_posts %} checked{% endif %}>
+                {% if post.thumbnail_url %}
+                  <img src="{{ post.thumbnail_url }}" alt="" loading="lazy" referrerpolicy="no-referrer">
+                {% else %}
+                  <span class="post-option__caption">{{ post.caption|truncatechars:60|default:"No caption" }}</span>
+                {% endif %}
+                <span class="post-option__type">{{ post.get_product_type_display }}</span>
+                <span class="post-option__check" aria-hidden="true"></span>
+              </label>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="builder-note">No posts synced yet. <a href="{% url 'instagram:accounts' %}">Sync your account</a> to pick specific posts.</p>
+        {% endif %}
+        {{ form.posts.errors }}
+      </div>
+    </section>
+
+    {# 3. Keywords #}
+    <section class="builder-section" data-show-for="comment dm_keyword story_reply">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div>
+          <h2 class="builder-section__title">
+            <span data-show-for="comment">And comments&hellip;</span>
+            <span data-show-for="dm_keyword">And the message says&hellip;</span>
+            <span data-show-for="story_reply">And the reply says&hellip;</span>
+          </h2>
+          <p class="builder-section__hint">Capital letters don't matter.</p>
+        </div>
+      </header>
+      <label class="switch-row">
+        <span>
+          <span class="switch-row__title">
+            <span data-show-for="comment">Any comment</span>
+            <span data-show-for="dm_keyword">Any message</span>
+            <span data-show-for="story_reply">Any story reply</span>
+          </span>
+          <span class="switch-row__hint">No keyword needed</span>
+        </span>
+        <span class="switch"><input type="checkbox" name="reply_to_all" data-reveal-off="keyword-field"{% if form.reply_to_all.value %} checked{% endif %}></span>
+      </label>
+      <div class="field builder-field" id="keyword-field">
+        <label for="{{ form.keywords.id_for_label }}">A specific word</label>
+        {{ form.keywords }}
+        <p class="field__help">Separate keywords with commas, e.g. LINK, GUIDE, PRICE</p>
+        <div class="chips" data-keyword-chips></div>
+        {{ form.keywords.errors }}
+      </div>
+    </section>
+
+    {# 4. Public reply #}
+    <section class="builder-section" data-show-for="comment">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div class="builder-section__grow">
+          <h2 class="builder-section__title">Reply publicly under the comment</h2>
+          <p class="builder-section__hint">Shows everyone it works, which brings in more comments.</p>
+        </div>
+        <span class="switch"><input type="checkbox" name="public_reply_enabled" data-reveal="public-reply-fields" aria-label="Reply publicly"{% if form.public_reply_enabled.value %} checked{% endif %}></span>
+      </header>
+      <div class="field builder-field" id="public-reply-fields">
+        <label for="{{ form.public_replies.id_for_label }}">Replies</label>
+        {{ form.public_replies }}
+        <p class="field__help">One per line. We rotate between them so Instagram doesn't see the same reply over and over.</p>
+        {{ form.public_replies.errors }}
+      </div>
+    </section>
+
+    {# 5. Audience #}
+    <section class="builder-section">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div>
+          <h2 class="builder-section__title">Who should get it?</h2>
+          <p class="builder-section__hint">Reply to everyone, only your followers, or ask people to follow you first.</p>
+        </div>
+      </header>
+      <div class="choice-grid">
+        {% for option in audience_options %}
+          <label class="choice-card">
+            <input type="radio" name="audience" value="{{ option.value }}"{% if form.audience.value == option.value %} checked{% endif %}>
+            <span class="choice-card__icon" aria-hidden="true">{{ option.icon }}</span>
+            <span>
+              <span class="choice-card__title">{{ option.label }}</span>
+              <span class="choice-card__hint">{{ option.hint }}</span>
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+      {{ form.audience.errors }}
+      <div id="follow-fields" class="builder-subfields" data-show-for-audience="follow_first">
+        <div class="field builder-field">
+          <label for="{{ form.follow_prompt.id_for_label }}">Message asking them to follow</label>
+          {{ form.follow_prompt }}
+          {{ form.follow_prompt.errors }}
+        </div>
+        <div class="field builder-field">
+          <label for="{{ form.follow_button.id_for_label }}">Button label</label>
+          {{ form.follow_button }}
+          {{ form.follow_button.errors }}
+        </div>
+        <div class="field builder-field">
+          <label for="{{ form.not_following_text.id_for_label }}">If they haven't followed yet</label>
+          {{ form.not_following_text }}
+          {{ form.not_following_text.errors }}
+        </div>
+      </div>
+    </section>
+
+    {# 6. DM #}
+    <section class="builder-section">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div>
+          <h2 class="builder-section__title">Send them a DM</h2>
+          <p class="builder-section__hint">The message they receive. Add a button to share your link.</p>
+        </div>
+      </header>
+      <div class="field builder-field">
+        <label for="{{ form.dm_text.id_for_label }}">Message <span class="char-count" data-count-for="{{ form.dm_text.id_for_label }}"></span></label>
+        {{ form.dm_text }}
+        {{ form.dm_text.errors }}
+      </div>
+      <div class="field-row">
+        <div class="field builder-field">
+          <label for="{{ form.button_title.id_for_label }}">Button text <span class="optional">optional</span></label>
+          {{ form.button_title }}
+          {{ form.button_title.errors }}
+        </div>
+        <div class="field builder-field">
+          <label for="{{ form.button_url.id_for_label }}">Button link</label>
+          {{ form.button_url }}
+          {{ form.button_url.errors }}
+        </div>
+      </div>
+    </section>
+
+    {# 7. Settings #}
+    <section class="builder-section">
+      <header class="builder-section__head">
+        <span class="step-number" aria-hidden="true"></span>
+        <div><h2 class="builder-section__title">Settings</h2></div>
+      </header>
+      <label class="switch-row">
+        <span>
+          <span class="switch-row__title">Reply to each person only once</span>
+          <span class="switch-row__hint">If they trigger it again, they won't get a second DM.</span>
+        </span>
+        <span class="switch"><input type="checkbox" name="once_per_contact"{% if form.once_per_contact.value %} checked{% endif %}></span>
+      </label>
+    </section>
+
+    <div class="builder-footer">
+      <label class="builder-footer__live">
+        <span class="switch"><input type="checkbox" name="go_live"{% if form.go_live.value %} checked{% endif %}></span>
+        <span><strong>Turn on</strong> <span class="muted text-sm">start replying right away</span></span>
+      </label>
+      <div class="builder-footer__actions">
+        <a href="{% url 'automations:list' %}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn--primary">{% if automation %}Save changes{% else %}Create automation{% endif %}</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="builder__preview" aria-label="Live preview">
+    <div class="phone">
+      <div class="phone__bar">
+        <span class="phone__avatar" aria-hidden="true"></span>
+        <span data-preview-account>{{ account_username }}</span>
+      </div>
+      <div class="phone__screen">
+        <div data-show-for="comment">
+          <p class="preview-label">On your post</p>
+          <div class="preview-post" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="12" cy="12" r="3.5"/></svg>
+          </div>
+          <div class="preview-comment">
+            <span class="preview-dot" aria-hidden="true"></span>
+            <p><strong>your_follower</strong> <span data-preview-keyword></span></p>
+          </div>
+          <div class="preview-comment preview-comment--reply" data-preview-public>
+            <span class="preview-dot preview-dot--brand" aria-hidden="true"></span>
+            <p><strong data-preview-account>{{ account_username }}</strong> <span data-preview-public-text></span></p>
+          </div>
+        </div>
+
+        <p class="preview-label">In their DMs</p>
+        <div class="preview-thread">
+          <div class="bubble bubble--in" data-show-for="dm_keyword"><span data-preview-keyword></span></div>
+          <div class="bubble bubble--in" data-show-for="story_reply">
+            <span class="bubble__meta">Replied to your story</span><span data-preview-keyword></span>
+          </div>
+          <div class="bubble bubble--in" data-show-for="story_mention">
+            <span class="bubble__meta">Mentioned you in their story</span>📣
+          </div>
+          <p class="preview-system" data-preview-followers>✓ Sent only because they follow you</p>
+          <div class="preview-thread__group" data-preview-follow>
+            <div class="bubble bubble--out">
+              <span data-preview-follow-text></span>
+              <span class="bubble__button" data-preview-follow-button></span>
+            </div>
+            <div class="bubble bubble--in"><span data-preview-follow-button></span></div>
+          </div>
+          <div class="bubble bubble--out">
+            <span data-preview-dm-text></span>
+            <span class="bubble__button" data-preview-button></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="builder__preview-caption">Live preview</p>
+  </aside>
+</form>
+
+<script src="{% static 'js/automation-builder.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% comment %}
+  Looping demo: a comment arrives, DamDM replies publicly, then DMs the link.
+  Driven by static/js/landing-demo.js, which adds is-* classes to [data-demo].
+{% endcomment %}{% load static %}
+<div class="demo" data-demo aria-label="Animated example: a comment gets an automatic reply and DM" role="img">
+  <span class="demo__badge" aria-hidden="true">
+    <img src="{% static 'img/logo.png' %}" alt="" width="36" height="36">
+  </span>
+  <span class="demo__chip demo__chip--a">
+    <img src="{% static 'img/logo.png' %}" alt="" width="16" height="16">Replied in 2s
+  </span>
+  <span class="demo__chip demo__chip--b">💬 Auto DM sent</span>
+  <span class="demo__chip demo__chip--c">🔒 Follow to unlock</span>
+
+  <div class="demo-phone" aria-hidden="true">
+    <div class="demo-phone__notch"></div>
+
+    <div class="demo-notice">
+      <span class="demo-avatar demo-avatar--brand"></span>
+      <span class="demo-notice__text"><strong>yourbrand</strong><span>Hey Maya! Here's your free guide 👇</span></span>
+    </div>
+
+    <div class="demo-screens">
+      <div class="demo-screen demo-screen--comments">
+        <div class="demo-top"><span class="demo-back">‹</span><strong>Comments</strong></div>
+        <div class="demo-reel">
+          <span class="demo-reel__play">▶</span>
+          <span class="demo-reel__caption"><strong>yourbrand</strong> Comment <b>LINK</b> and I'll send you my free guide ✨</span>
+        </div>
+        <ul class="demo-comments">
+          <li class="demo-comment" data-demo-step="1">
+            <span class="demo-avatar demo-avatar--1"></span>
+            <p><strong>maya.creates</strong> LINK 🙌<span class="demo-meta">now · Reply</span></p>
+          </li>
+          <li class="demo-comment demo-comment--reply" data-demo-step="2">
+            <span class="demo-avatar demo-avatar--brand"></span>
+            <p><strong>yourbrand</strong> Sent! Check your DMs 📩<span class="demo-meta">now · <img class="demo-meta__logo" src="{% static 'img/logo.png' %}" alt="" width="10" height="10">Sent by DamDM</span></p>
+          </li>
+          <li class="demo-comment" data-demo-step="3">
+            <span class="demo-avatar demo-avatar--2"></span>
+            <p><strong>jay.fitness</strong> link please 🔥<span class="demo-meta">now · Reply</span></p>
+          </li>
+          <li class="demo-comment demo-comment--reply" data-demo-step="4">
+            <span class="demo-avatar demo-avatar--brand"></span>
+            <p><strong>yourbrand</strong> Just sent it to your inbox ✨<span class="demo-meta">now · <img class="demo-meta__logo" src="{% static 'img/logo.png' %}" alt="" width="10" height="10">Sent by DamDM</span></p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="demo-screen demo-screen--dm">
+        <div class="demo-top">
+          <span class="demo-back">‹</span>
+          <span class="demo-avatar demo-avatar--brand demo-avatar--small"></span>
+          <strong>yourbrand</strong>
+        </div>
+        <div class="demo-thread">
+          <p class="demo-thread__day">Today</p>
+          <div class="demo-typing" data-demo-step="typing"><span></span><span></span><span></span></div>
+          <div class="demo-bubble demo-bubble--in" data-demo-step="6">
+            Hey Maya! 👋 Here's the free guide you asked for
+            <span class="demo-bubble__button">Open the guide</span>
+          </div>
+          <div class="demo-bubble demo-bubble--out" data-demo-step="7">OMG thank you!! 😍</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

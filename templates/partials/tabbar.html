@@ -1,0 +1,14 @@
+{% comment %}Bottom tab bar for phones, with a raised create button in the middle.{% endcomment %}
+<nav class="tabbar" aria-label="Main">
+  {% for item in nav_items %}
+    <a href="{{ item.url }}" class="tabbar__item{% if item.active %} is-active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name=item.icon size=24 %}
+      <span>{{ item.label }}</span>
+    </a>
+    {% if forloop.counter == 2 %}
+      <a href="{% url 'automations:new' %}" class="tabbar__create" aria-label="New automation">
+        <span class="tabbar__create-btn">{% include "partials/icon.html" with name="plus" size=24 stroke="2.4" %}</span>
+      </a>
+    {% endif %}
+  {% endfor %}
+</nav>

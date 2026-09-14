@@ -1,0 +1,49 @@
+{% comment %}Signed-in navigation: top bar on phones, sidebar on desktop.{% endcomment %}
+<header class="appbar">
+  <a href="{% url 'core:dashboard' %}" class="brand">
+    {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
+  </a>
+  <div class="appbar__actions">
+    <button type="button" class="icon-button theme-toggle" data-theme-toggle aria-label="Switch light or dark mode">
+      <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>
+      <span class="theme-toggle__sun">{% include "partials/icon.html" with name="sun" size=20 %}</span>
+    </button>
+    <a href="{% url 'accounts:profile' %}" class="avatar" aria-label="Settings">{{ user.get_short_name|first|upper }}</a>
+  </div>
+</header>
+
+<aside class="sidebar">
+  <a href="{% url 'core:dashboard' %}" class="brand">
+    {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
+  </a>
+
+  <a href="{% url 'automations:new' %}" class="btn btn--primary sidebar__cta">
+    {% include "partials/icon.html" with name="plus" size=18 stroke="2.2" %} New automation
+  </a>
+
+  <nav class="sidebar__nav" aria-label="Main">
+    {% for item in nav_items %}
+      <a href="{{ item.url }}" class="sidebar__link{% if item.active %} is-active{% endif %}"{% if item.active %} aria-current="page"{% endif %}>
+        {% include "partials/icon.html" with name=item.icon size=20 %}<span>{{ item.label }}</span>
+      </a>
+    {% endfor %}
+  </nav>
+
+  <div class="sidebar__foot">
+    <a href="{% url 'accounts:profile' %}" class="sidebar__user">
+      <span class="avatar">{{ user.get_short_name|first|upper }}</span>
+      <span class="sidebar__user-text"><strong>{{ user.get_short_name }}</strong><span>{{ user.email }}</span></span>
+    </a>
+    <button type="button" class="sidebar__link theme-toggle" data-theme-toggle>
+      <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>
+      <span class="theme-toggle__sun">{% include "partials/icon.html" with name="sun" size=20 %}</span>
+      <span>Switch theme</span>
+    </button>
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="sidebar__link">
+        {% include "partials/icon.html" with name="logout" size=20 %}<span>Log out</span>
+      </button>
+    </form>
+  </div>
+</aside>
