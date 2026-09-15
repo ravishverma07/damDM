@@ -1752,3 +1752,107 @@ h1 { font-size: 1.45rem; }
   .demo__badge::after,
   .demo.is-2 .demo__badge { animation: none; }
 }
+
+/* --- refer & earn ----------------------------------------------------- */
+
+.refer-hero {
+  margin-bottom: 1rem;
+  padding: 1.75rem 1.5rem;
+  color: #fff;
+  background: var(--ig-gradient);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(221, 42, 123, 0.25);
+}
+.refer-hero h1 { margin: 0 0 0.5rem; font-size: clamp(1.5rem, 6vw, 2rem); font-weight: 800; letter-spacing: -0.02em; }
+.refer-hero > p { margin: 0 0 1.25rem; opacity: 0.92; }
+.refer-hero .refer-hero__eyebrow {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  opacity: 1;
+}
+.refer-link { display: flex; gap: 0.5rem; padding: 0.35rem; background: rgba(255, 255, 255, 0.18); border-radius: 12px; }
+.refer-link input { flex: 1; min-width: 0; color: #fff; background: transparent; border: none; }
+.refer-link input:focus { box-shadow: none; }
+.refer-share { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.btn--light-outline { color: #fff; background: transparent; border-color: rgba(255, 255, 255, 0.55); border-radius: 10px; }
+.btn--light-outline:hover { color: #fff; background: rgba(255, 255, 255, 0.12); border-color: #fff; }
+.refer-hero .refer-hero__code { margin: 1rem 0 0; font-size: 0.85rem; }
+.refer-stats { margin-top: 0; }
+.refer-withdraw { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.refer-withdraw input { flex: 1; min-width: 0; }
+.btn:disabled { cursor: not-allowed; opacity: 0.5; }
+.avatar--small { width: 30px; height: 30px; font-size: 0.75rem; }
+.refer-row__date { display: block; font-size: 0.75rem; color: var(--muted); }
+.refer-empty { margin: 0.5rem 0.75rem 1rem; font-size: 0.875rem; color: var(--muted); }
+.refer-rules ol { margin: 0.5rem 0 1rem; padding-left: 1.2rem; }
+.refer-rules li { margin-bottom: 0.4rem; }
+.refer-teaser { color: inherit; text-decoration: none; }
+.refer-teaser:hover { text-decoration: none; border-color: var(--border-strong); }
+.refer-teaser > div { flex: 1; min-width: 12rem; }
+.refer-teaser__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #fff;
+  background: var(--ig-gradient);
+  border-radius: 12px;
+}
+
+/* Settings rows: keep avatars round and status badges on one line. */
+.settings-row > .avatar,
+.settings-row > .badge { flex: none; }
+.settings-row > .badge { white-space: nowrap; }
+
+/* --- notifications and coupons ---------------------------------------- */
+
+.notice-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.notice-card__text { flex: 1; min-width: 14rem; }
+.notice-card__text p { margin: 0.15rem 0 0; font-size: 0.85rem; color: var(--text-soft); }
+.notice-card__actions { display: flex; align-items: center; gap: 0.25rem; }
+.notice-card__actions form { margin: 0; }
+
+.coupon-list { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.coupon-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px dashed #dd2a7b;
+  border-radius: 12px;
+}
+.coupon-card__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: #fff;
+  background: var(--ig-gradient);
+  border-radius: 10px;
+}
+.coupon-card__text { flex: 1; min-width: 0; }
+.coupon-card__text strong,
+.coupon-card__text span { display: block; }
+.coupon-card__text span { font-size: 0.78rem; color: var(--muted); }
+
+.refer-teaser--section { margin-top: 2rem; }

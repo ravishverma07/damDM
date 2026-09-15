@@ -4,6 +4,22 @@
 <h1>Overview</h1>
 <p class="subtitle">Welcome back, {{ user.get_short_name }}.</p>
 
+{% for note in notifications %}
+  <div class="notice-card">
+    <div class="notice-card__text">
+      <strong>{{ note.title }}</strong>
+      {% if note.body %}<p>{{ note.body }}</p>{% endif %}
+    </div>
+    <div class="notice-card__actions">
+      {% if note.action_url %}<a href="{{ note.action_url }}" class="btn btn--primary btn--small">{{ note.action_label|default:"Open" }}</a>{% endif %}
+      <form method="post" action="{% url 'core:notification-dismiss' note.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="icon-button" aria-label="Dismiss">&times;</button>
+      </form>
+    </div>
+  </div>
+{% endfor %}
+
 {% with accounts=user.connected_accounts.all %}
   <div class="card connect-card">
     {% if accounts %}
@@ -49,4 +65,5 @@
   <div class="stat"><p class="stat__label">DMs delivered</p><p class="stat__value">—</p></div>
   <div class="stat"><p class="stat__label">Link clicks</p><p class="stat__value">—</p></div>
 </div>
+
 {% endblock %}

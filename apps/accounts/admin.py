@@ -8,15 +8,25 @@ from .models import OAuthState, SocialLogin, User
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
     ordering = ("-created_at",)
-    list_display = ("email", "full_name", "email_verified", "is_active", "is_staff", "created_at")
-    list_filter = ("is_active", "is_staff", "is_superuser", "email_verified", "onboarding_state")
-    search_fields = ("email", "full_name")
-    readonly_fields = ("created_at", "updated_at", "last_login")
+    list_display = (
+        "email", "full_name", "account_status", "email_verified", "is_active", "created_at",
+    )
+    list_filter = (
+        "account_status", "is_active", "is_staff", "is_superuser", "email_verified",
+        "onboarding_state",
+    )
+    search_fields = ("email", "original_email", "full_name")
+    readonly_fields = (
+        "created_at", "updated_at", "last_login", "account_status", "deleted_at", "original_email",
+    )
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (_("Profile"), {
-            "fields": ("full_name", "avatar_url", "timezone", "email_verified", "onboarding_state"),
+            "fields": (
+                "full_name", "avatar_url", "timezone", "email_verified", "onboarding_state",
+                "account_status", "deleted_at", "original_email",
+            ),
         }),
         (_("Permissions"), {
             "fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions"),

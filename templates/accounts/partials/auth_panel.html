@@ -27,6 +27,10 @@
     <button type="button" role="tab" data-auth-mode="signup" aria-selected="{% if panel.mode == 'signup' %}true{% else %}false{% endif %}">Sign up</button>
   </div>
 
+  {% if panel.invited and not panel.pending_instagram %}
+    <p class="auth-note" data-show="signup">🎁 A friend invited you. Start with a 14-day free trial.</p>
+  {% endif %}
+
   {% if panel.pending_instagram %}
     <p class="auth-note" data-show="signin signup">
       We'll connect <strong>@{{ panel.pending_instagram }}</strong> once you're in.

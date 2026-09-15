@@ -107,3 +107,20 @@ class DeleteAccountForm(forms.Form):
         if value != self.user.email:
             raise forms.ValidationError("That doesn't match your account email.")
         return value
+
+    def clean(self):
+        from apps.billing.services.access import LIVE_STATUSES, current_subscription
+
+        cleaned = super().clean()
+        subscription = current_subscription(self.user)
+        if (
+            subscription is not None
+            and subscription.status in LIVE_STATUSES
+            and not subscription.cancel_at_period_end
+        ):
+            # Deleting doesn't touch billing, so a renewing plan would keep charging.
+            raise forms.ValidationError(
+                "Cancel your plan on Plan & billing before deleting your account, "
+                "so you aren't charged again."
+            )
+        return cleaned

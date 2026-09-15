@@ -35,6 +35,9 @@
   </section>
 
   <section class="card settings-list">
+    <a href="{% url 'referrals:overview' %}" class="settings-row">
+      {% include "partials/icon.html" with name="gift" size=20 %}<span>Refer &amp; earn</span>{% include "partials/icon.html" with name="chevron" size=18 %}
+    </a>
     <a href="{% url 'billing:overview' %}" class="settings-row">
       {% include "partials/icon.html" with name="card" size=20 %}<span>Plan &amp; billing</span>{% include "partials/icon.html" with name="chevron" size=18 %}
     </a>

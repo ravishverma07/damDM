@@ -43,8 +43,11 @@ def safe_next(request, candidate: str | None) -> str:
 
 def complete_login(request, user: User, *, method: str) -> None:
     """Log ``user`` in and connect any Instagram account parked during sign-up."""
+    from apps.referrals.services import attach_referral
+
     login(request, user, backend=BACKEND)
     audit(AuditLog.Action.USER_LOGIN, actor=user, request=request, method=method)
+    attach_referral(request, user)
     attach_pending(request, user)
 
 
@@ -58,6 +61,8 @@ def build_auth_panel(
     finish_form=None,
 ) -> dict:
     """Context for ``accounts/partials/auth_panel.html``."""
+    from apps.referrals.services import code_from_request, find_code
+
     pending = pending_username(request)
     if mode not in AUTH_MODES or (mode == "finish" and not pending):
         mode = "signin"
@@ -65,6 +70,7 @@ def build_auth_panel(
         "mode": mode,
         "next": safe_next(request, next_url),
         "pending_instagram": pending,
+        "invited": find_code(code_from_request(request)) is not None,
         "login_form": login_form or EmailLoginForm(request, auto_id="signin_%s"),
         "signup_form": signup_form or RegistrationForm(auto_id="signup_%s"),
         "finish_form": finish_form or InstagramEmailForm(auto_id="finish_%s"),

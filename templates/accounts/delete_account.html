@@ -4,12 +4,20 @@
 <div class="card card--narrow">
   <h1>Delete account</h1>
   <p class="text-sm muted">
-    This erases your profile, automations, message logs and every stored Instagram
-    token. It cannot be undone.
+    Deleting your account closes it and signs you out. You won't be able to sign in to it again.
+  </p>
+  <p class="text-sm muted">
+    If you're on a plan, <a href="{% url 'billing:overview' %}">cancel it first</a> so you aren't
+    charged again. To remove {{ APP_NAME }}'s access to Instagram, disconnect your accounts on the
+    <a href="{% url 'instagram:accounts' %}">Instagram</a> page before deleting.
+  </p>
+  <p class="text-sm muted">
+    Account records are kept as described in our <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
+    To have your personal data erased, email <a href="mailto:privacy@dammai.in">privacy@dammai.in</a>.
   </p>
   <form method="post" novalidate>
     {% include "partials/form.html" %}
-    <button type="submit" class="btn btn--danger btn--block">Permanently delete my account</button>
+    <button type="submit" class="btn btn--danger btn--block">Delete my account</button>
   </form>
 </div>
 {% endblock %}

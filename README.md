@@ -47,7 +47,8 @@ apps/
 ├── automations/  Automation builder, templates, keywords, posts, steps, runs, matching
 ├── messaging/    Contacts, tags, comments, conversations, messages, follow checks
 ├── analytics/    Tracked links, clicks, daily rollups
-└── billing/      Plans, subscriptions, usage, provider abstraction
+├── billing/      Plan, Razorpay subscriptions, free trial and abuse checks, payments
+└── referrals/    Refer and earn: invite codes, rewards, UPI payouts
 ```
 
 ## Sign-in and connecting Instagram
@@ -222,6 +223,53 @@ its signature is verified, then the subscription is fetched from Razorpay.
 for the events above; see `.env.example`. With `RAZORPAY_MOCK=True` (the dev default)
 checkout approves instantly and trials renew in `sync_subscriptions`, with no Razorpay
 account needed. Production refuses to start in mock mode.
+
+## Refer and earn
+
+Every user gets an invite link, `/r/<CODE>/`, on **Refer & earn** (sidebar, Settings and a
+dashboard card), with Copy, WhatsApp and native share buttons. It lives in `apps/referrals`.
+
+1. **Invite.** Opening the link stores the code in a signed cookie for 30 days and opens the
+   sign-up popup ("A friend invited you"). Only an account **created within 30 minutes** of
+   signing in (email, Google or Instagram) is attached, so existing users can't be claimed.
+2. **Earn.** When the friend's **first real payment** succeeds (not the free trial), the
+   referrer earns **50% of it (₹49.50)**, once per friend (`ReferralReward` is one-to-one
+   with `Referral`, and `Referral.referred` is one-to-one with the user).
+3. **Hold.** Rewards stay *on hold* for 7 days; `release_referral_rewards` (hourly) makes
+   them *available*, or cancels them if the payment was refunded.
+4. **Withdraw.** From ₹100, the user enters a UPI ID (stored encrypted) to request a
+   `Payout`. One open withdrawal at a time. In the admin, pay the UPI ID shown, put the UTR
+   in *Reference*, then run **Mark as paid**; **Reject** returns the money to the wallet.
+
+**Self-referrals don't earn.** The same hashed signals as the trial are compared between
+referrer and friend: email (Gmail dots and `+tags` ignored), Google account, Instagram
+accounts, browser (including every browser the referrer opened their referral page in),
+and UPI ID or card (`Payment.method_hash`). They're checked when the friend signs up and
+again when they pay; a match marks the referral *Not eligible*.
+
+## Coupons
+
+Coupons live in `apps/coupons` and are created in **Admin → Coupons**:
+
+| Field | Meaning |
+|---|---|
+| Instagram usernames | One per line (`@` optional). **Only accounts whose connected Instagram username exactly matches** can use the coupon, once per username and once per DamDM user. |
+| Discount % | 1–100. |
+| Discounted months | How many monthly payments get the discount. |
+| Razorpay offer id | Needed for discounts **under 100%**: create an Offer in the Razorpay Dashboard with the same percentage, limited to the same number of cycles, and paste its `offer_…` id. |
+| Expires | The coupon can't be used after this. |
+| Notify on connect | Shows a dashboard notification ("🎁 You have a coupon") when that Instagram account connects, or straight away if it's already connected. |
+
+**Using a coupon.** The holder sees it on **Plan & billing** and taps **Redeem** when starting
+their plan. A **100% coupon** adds free months after the 14-day trial by moving the first AutoPay
+charge later (14 days + 1 month = first ₹99 on day 45); no Razorpay setup needed. A smaller discount
+is applied by attaching the Razorpay Offer to the subscription. Coupons are used when starting a plan,
+not on a plan that's already running.
+
+**Archiving.** Select coupons and run **Archive**. Nobody can redeem them afterwards. Archiving a
+**100% coupon also cancels the subscriptions it started** (automations pause and the user is
+notified); subscriptions from **discount coupons keep running**. Whether a holder still follows
+@damdm is checked manually; archive the coupon if not.
 
 ## Dark mode
 

@@ -17,7 +17,7 @@
           <p class="muted text-sm">₹99/month · Unlimited DMs and automations</p>
         </div>
         {% if subscription.status == "trialing" %}
-          <span class="badge badge--active">Free trial</span>
+          <span class="badge badge--active">{% if subscription.coupon_redemption %}Coupon{% else %}Free trial{% endif %}</span>
         {% elif subscription.status == "past_due" %}
           <span class="badge badge--error">Payment due</span>
         {% else %}
@@ -27,7 +27,7 @@
 
       <dl class="account-meta">
         {% if subscription.status == "trialing" %}
-          <div><dt>Trial left</dt><dd>{{ subscription.trial_days_left }} day{{ subscription.trial_days_left|pluralize }}</dd></div>
+          <div><dt>Free days left</dt><dd>{{ subscription.trial_days_left }} day{{ subscription.trial_days_left|pluralize }}</dd></div>
           <div>
             <dt>{% if subscription.cancel_at_period_end %}Access ends{% else %}First payment{% endif %}</dt>
             <dd>{{ subscription.trial_ends_at|date:"j M Y" }}</dd>
@@ -72,6 +72,23 @@
         <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Follow to unlock, story replies, DM keywords</li>
         <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Cancel any time</li>
       </ul>
+
+      {% if coupons and eligibility.reason != "no_instagram" %}
+        <div class="coupon-list">
+          {% for coupon in coupons %}
+            <form method="post" action="{% url 'billing:start' %}" class="coupon-card">
+              {% csrf_token %}
+              <input type="hidden" name="coupon" value="{{ coupon.code }}">
+              <span class="coupon-card__icon">{% include "partials/icon.html" with name="gift" size=20 %}</span>
+              <span class="coupon-card__text">
+                <strong>{{ coupon.summary }}</strong>
+                <span>{% if eligibility.eligible %}Plus your 14-day free trial · {% endif %}Use by {{ coupon.expires_at|date:"j M Y" }}</span>
+              </span>
+              <button type="submit" class="btn btn--primary btn--small">Redeem</button>
+            </form>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       {% if eligibility.reason == "no_instagram" %}
         <p class="pricing-card__note">{{ eligibility.message }}</p>

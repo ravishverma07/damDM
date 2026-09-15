@@ -27,6 +27,9 @@
         {% include "partials/icon.html" with name=item.icon size=20 %}<span>{{ item.label }}</span>
       </a>
     {% endfor %}
+    <a href="{% url 'referrals:overview' %}" class="sidebar__link{% if request.resolver_match.namespace == 'referrals' %} is-active{% endif %}">
+      {% include "partials/icon.html" with name="gift" size=20 %}<span>Refer &amp; earn</span>
+    </a>
   </nav>
 
   <div class="sidebar__foot">

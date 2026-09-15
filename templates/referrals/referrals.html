@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Refer &amp; earn · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<div class="settings refer">
+  <section class="refer-hero">
+    <p class="refer-hero__eyebrow">Refer &amp; earn</p>
+    <h1>Earn ₹{{ reward_amount|floatformat:"-2" }} for every friend</h1>
+    <p>When a friend you invite pays for their first month of {{ APP_NAME }}, you get 50% of it, sent to your UPI.</p>
+    <div class="refer-link">
+      <input type="text" readonly value="{{ share_url }}" aria-label="Your invite link" data-copy-source>
+      <button type="button" class="btn btn--light" data-copy>Copy</button>
+    </div>
+    <div class="refer-share">
+      <a class="btn btn--light-outline" href="https://wa.me/?text={{ share_message|urlencode }}" target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
+      <button type="button" class="btn btn--light-outline" data-share data-share-text="{{ share_text }}" data-share-url="{{ share_url }}" hidden>More options</button>
+    </div>
+    <p class="refer-hero__code">Your code: <strong>{{ code.code }}</strong></p>
+  </section>
+
+  <div class="stat-grid refer-stats">
+    <div class="stat"><p class="stat__label">Friends joined</p><p class="stat__value stat__value--on">{{ referrals_count }}</p></div>
+    <div class="stat"><p class="stat__label">Friends paid</p><p class="stat__value stat__value--on">{{ rewarded_count }}</p></div>
+    <div class="stat"><p class="stat__label">On hold</p><p class="stat__value stat__value--on">₹{{ amounts.pending|floatformat:"-2" }}</p></div>
+    <div class="stat"><p class="stat__label">Available</p><p class="stat__value stat__value--on">₹{{ amounts.available|floatformat:"-2" }}</p></div>
+  </div>
+
+  <section class="card settings-card">
+    <h2>Withdraw to UPI</h2>
+    {% if open_payout %}
+      <p class="muted text-sm">
+        ₹{{ open_payout.amount_display|floatformat:"-2" }} is on its way to your UPI ID.
+        It will show as paid here once it's sent.
+      </p>
+    {% else %}
+      <p class="muted text-sm">
+        Available now: <strong>₹{{ amounts.available|floatformat:"-2" }}</strong>.
+        You can withdraw once you have ₹{{ min_payout }}.
+      </p>
+      <form method="post" class="refer-withdraw">
+        {% csrf_token %}
+        <input type="text" name="upi_id" placeholder="yourname@okaxis" autocomplete="off" aria-label="UPI ID" required{% if not can_withdraw %} disabled{% endif %}>
+        <button type="submit" class="btn btn--primary"{% if not can_withdraw %} disabled{% endif %}>Withdraw</button>
+      </form>
+    {% endif %}
+  </section>
+
+  <section class="card settings-list">
+    <p class="settings-list__title">Your invites</p>
+    {% for referral in referrals %}
+      <div class="settings-row settings-row--static">
+        <span class="avatar avatar--small">{{ referral.masked_email|first|upper }}</span>
+        <span>{{ referral.masked_email }}<span class="refer-row__date">Joined {{ referral.created_at|date:"j M Y" }}</span></span>
+        {% if referral.status == "rejected" %}
+          <span class="badge">Not eligible</span>
+        {% elif referral.reward_or_none %}
+          {% with reward=referral.reward_or_none %}
+            {% if reward.status == "pending" %}
+              <span class="badge badge--expired" title="Held until {{ reward.available_at|date:'j M' }}">₹{{ reward.amount_display|floatformat:"-2" }} on hold</span>
+            {% elif reward.status == "cancelled" %}
+              <span class="badge">Refunded</span>
+            {% else %}
+              <span class="badge badge--active">₹{{ reward.amount_display|floatformat:"-2" }} earned</span>
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          <span class="badge">Not paid yet</span>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="refer-empty">No invites yet. Share your link to get started.</p>
+    {% endfor %}
+  </section>
+
+  {% if payouts %}
+    <section class="card settings-list">
+      <p class="settings-list__title">Withdrawals</p>
+      {% for payout in payouts %}
+        <div class="settings-row settings-row--static">
+          {% include "partials/icon.html" with name="card" size=20 %}
+          <span>₹{{ payout.amount_display|floatformat:"-2" }}<span class="refer-row__date">{{ payout.created_at|date:"j M Y" }}{% if payout.reference %} · Ref {{ payout.reference }}{% endif %}</span></span>
+          <span class="badge{% if payout.status == 'paid' %} badge--active{% elif payout.status == 'requested' %} badge--expired{% endif %}">{{ payout.get_status_display }}</span>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  <section class="card refer-rules">
+    <h2>How it works</h2>
+    <ol>
+      <li>Share your link. Friends who sign up within 30 days of opening it are linked to you.</li>
+      <li>Your friend starts their free trial and pays for their first month (₹99).</li>
+      <li>You earn ₹{{ reward_amount|floatformat:"-2" }}. It's held for {{ hold_days }} days, then you can withdraw to UPI once you have ₹{{ min_payout }}.</li>
+    </ol>
+    <p class="muted text-sm">
+      Only new {{ APP_NAME }} accounts count, and each friend earns you one reward. Accounts that
+      share your email, Google account, Instagram account, device or payment method don't count.
+    </p>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var copyButton = document.querySelector("[data-copy]");
+    var source = document.querySelector("[data-copy-source]");
+    function copied() {
+      copyButton.textContent = "Copied!";
+      setTimeout(function () { copyButton.textContent = "Copy"; }, 1800);
+    }
+    function fallbackCopy() {
+      source.select();
+      document.execCommand("copy");
+      copied();
+    }
+    if (copyButton) {
+      copyButton.addEventListener("click", function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(source.value).then(copied, fallbackCopy);
+        else fallbackCopy();
+      });
+    }
+    var shareButton = document.querySelector("[data-share]");
+    if (shareButton && navigator.share) {
+      shareButton.hidden = false;
+      shareButton.addEventListener("click", function () {
+        navigator.share({
+          title: "{{ APP_NAME|escapejs }}",
+          text: shareButton.dataset.shareText,
+          url: shareButton.dataset.shareUrl,
+        }).catch(function () {});
+      });
+    }
+  })();
+</script>
+{% endblock %}

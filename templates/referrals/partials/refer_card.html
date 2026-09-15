@@ -1,0 +1,9 @@
+{% comment %}Refer & earn teaser, shown at the bottom of the Instagram pages.{% endcomment %}
+<a href="{% url 'referrals:overview' %}" class="card cta-card refer-teaser refer-teaser--section">
+  <span class="refer-teaser__icon">{% include "partials/icon.html" with name="gift" size=22 %}</span>
+  <div>
+    <h2>Refer friends, earn ₹49.50 each</h2>
+    <p class="muted text-sm">Get 50% of a friend's first month, sent to your UPI.</p>
+  </div>
+  <span class="btn">Invite</span>
+</a>

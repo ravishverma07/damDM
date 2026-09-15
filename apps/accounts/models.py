@@ -17,6 +17,10 @@ OAUTH_STATE_TTL = timedelta(minutes=15)
 class User(AbstractBaseUser, PermissionsMixin):
     """Creator account. Email is the login identifier; there is no username."""
 
+    class AccountStatus(models.TextChoices):
+        ACTIVE = "active", "Active"
+        DELETED = "deleted", "Deleted"
+
     class Onboarding(models.TextChoices):
         SIGNED_UP = "signed_up", "Signed up"
         INSTAGRAM_CONNECTED = "instagram_connected", "Instagram connected"
@@ -33,6 +37,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     # True once an identity provider (Google) has proven the address.
     email_verified = models.BooleanField(default=False)
+
+    # Deleting an account from the app closes it; the row is kept (see close_account).
+    account_status = models.CharField(
+        max_length=20, choices=AccountStatus.choices, default=AccountStatus.ACTIVE, db_index=True
+    )
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    # The email the account had before it was deleted (the email field is freed for re-use).
+    original_email = models.EmailField(blank=True)
 
     onboarding_state = models.CharField(
         max_length=32, choices=Onboarding.choices, default=Onboarding.SIGNED_UP

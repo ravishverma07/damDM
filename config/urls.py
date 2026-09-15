@@ -3,6 +3,8 @@ from django.templatetags.static import static
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+from apps.referrals.views import ReferralLinkView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Browsers ask for /favicon.ico on their own; point them at the PNG.
@@ -12,6 +14,8 @@ urlpatterns = [
     path("instagram/", include("apps.instagram.urls", namespace="instagram")),
     path("automations/", include("apps.automations.urls", namespace="automations")),
     path("billing/", include("apps.billing.urls", namespace="billing")),
+    path("refer/", include("apps.referrals.urls", namespace="referrals")),
+    path("r/<str:code>/", ReferralLinkView.as_view(), name="referral-link"),
     path("l/", include("apps.analytics.urls", namespace="analytics")),
 ]
 

@@ -24,3 +24,4 @@ def sync_subscriptions() -> None:
     ).select_related("user")
     for subscription in due:
         sync_with_provider(subscription)
+

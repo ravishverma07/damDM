@@ -268,6 +268,8 @@ class Payment(TimeStampedModel):
     currency = models.CharField(max_length=3, default="INR")
     status = models.CharField(max_length=20, choices=Status.choices)
     method = models.CharField(max_length=20, blank=True)
+    # Keyed hash of the UPI ID or card, to spot one person paying for "friends".
+    method_hash = models.CharField(max_length=64, blank=True, db_index=True)
     paid_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -346,3 +348,4 @@ class TrialFingerprint(models.Model):
 
     def __str__(self) -> str:
         return f"{self.kind}:{self.value_hash[:10]}…"
+

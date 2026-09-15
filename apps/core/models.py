@@ -120,3 +120,36 @@ class DataDeletionRequest(TimeStampedModel):
         self.deleted_counts = counts
         self.completed_at = timezone.now()
         self.save(update_fields=["status", "deleted_counts", "completed_at", "updated_at"])
+
+
+class Notification(models.Model):
+    """An in-app message shown on the dashboard until the user dismisses it."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
+    )
+    kind = models.CharField(max_length=40)
+    title = models.CharField(max_length=120)
+    body = models.CharField(max_length=300, blank=True)
+    action_label = models.CharField(max_length=40, blank=True)
+    action_url = models.CharField(max_length=255, blank=True)
+    # Makes creation idempotent: one notification per user and key.
+    dedupe_key = models.CharField(max_length=100, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "notification"
+        verbose_name_plural = "notifications"
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "dedupe_key"],
+                condition=~models.Q(dedupe_key=""),
+                name="uniq_notification_per_user_and_key",
+            ),
+        ]
+        indexes = [models.Index(fields=["user", "read_at"])]
+
+    def __str__(self) -> str:
+        return f"{self.title} → {self.user_id}"

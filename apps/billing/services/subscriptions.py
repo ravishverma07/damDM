@@ -10,6 +10,7 @@ what the browser says.
 from __future__ import annotations
 
 import logging
+import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -19,6 +20,7 @@ from django.utils import timezone
 
 from apps.automations.models import Automation
 from apps.core.utils import client_ip, hash_ip
+from apps.referrals.services import reward_for_payment
 
 from ..models import Payment, Plan, Subscription, TrialClaim
 from ..providers.base import BillingError, SubscriptionState, WebhookEventData
@@ -38,6 +40,8 @@ logger = logging.getLogger("damdm.billing")
 
 PLAN_SLUG = "pro"
 MOCK_PERIOD = timedelta(days=30)
+#: A 100% coupon month moves the first charge this much later.
+FREE_MONTH = timedelta(days=30)
 Status = Subscription.Status
 
 #: Razorpay status -> ours. "authenticated" is resolved separately (trial or not).
@@ -72,8 +76,13 @@ def active_plan() -> Plan:
     return plan
 
 
-def start_checkout(request, user) -> Checkout:
-    """Create a provider subscription, with a trial when the person is eligible."""
+def start_checkout(request, user, coupon=None) -> Checkout:
+    """
+    Create a provider subscription, with a trial when the person is eligible.
+
+    ``coupon`` (already checked by the caller) either adds free months after the
+    trial - the first charge simply moves later - or attaches its Razorpay Offer.
+    """
     existing = current_subscription(user)
     if existing is not None and existing.has_access:
         raise SubscriptionError("Your plan is already active.")
@@ -84,13 +93,19 @@ def start_checkout(request, user) -> Checkout:
         raise SubscriptionError(eligibility.message)
     trial = eligibility.eligible and plan.trial_days > 0
     trial_ends_at = timezone.now() + timedelta(days=plan.trial_days) if trial else None
+    free_until = trial_ends_at
+    offer_id = ""
+    if coupon is not None and coupon.is_free:
+        free_until = (trial_ends_at or timezone.now()) + FREE_MONTH * coupon.discount_months
+    elif coupon is not None:
+        offer_id = coupon.razorpay_offer_id
 
     provider = get_provider()
     previous = Subscription.objects.filter(user=user).exclude(provider_customer_id="").first()
     try:
         customer_id = previous.provider_customer_id if previous else provider.create_customer(user)
         state = provider.create_subscription(
-            user=user, plan=plan, customer_id=customer_id, start_at=trial_ends_at
+            user=user, plan=plan, customer_id=customer_id, start_at=free_until, offer_id=offer_id
         )
     except BillingError as exc:
         raise SubscriptionError(str(exc)) from exc
@@ -108,7 +123,7 @@ def start_checkout(request, user) -> Checkout:
             provider_customer_id=customer_id,
             provider_subscription_id=state.subscription_id,
             status=Status.INCOMPLETE,
-            trial_ends_at=trial_ends_at,
+            trial_ends_at=free_until,
             trial_signals=[list(pair) for pair in identity_signals(request, user)] if trial else [],
             trial_ip_hash=hash_ip(client_ip(request)) if trial else "",
         )
@@ -117,10 +132,12 @@ def start_checkout(request, user) -> Checkout:
         apply_provider_status(
             subscription,
             "authenticated",
-            period_start=None if trial else now,
-            period_end=None if trial else now + MOCK_PERIOD,
+            period_start=None if free_until else now,
+            period_end=None if free_until else now + MOCK_PERIOD,
             payment_method="upi",
         )
+        if not free_until:
+            record_payment(subscription, _mock_payment(subscription), Payment.Status.CAPTURED)
         return Checkout(subscription, trial, completed=True)
     return Checkout(subscription, trial, completed=False)
 
@@ -208,7 +225,8 @@ def apply_provider_status(
         subscription.ended_at = ended_at or subscription.ended_at or timezone.now()
     subscription.save()
 
-    if subscription.trial_ends_at:
+    # Only real free trials are tracked; free months from a coupon aren't a trial.
+    if subscription.trial_signals:
         _update_trial(subscription, payment)
     # Judged across all the user's subscriptions, so an old one ending can't pause a new one.
     if not has_access(subscription.user):
@@ -238,7 +256,7 @@ def handle_webhook(event: WebhookEventData) -> str:
 
 
 def record_payment(subscription: Subscription, payment: dict, status: str) -> Payment:
-    record, _ = Payment.objects.update_or_create(
+    record, created = Payment.objects.update_or_create(
         provider=subscription.provider,
         provider_payment_id=str(payment["id"]),
         defaults={
@@ -248,9 +266,12 @@ def record_payment(subscription: Subscription, payment: dict, status: str) -> Pa
             "currency": str(payment.get("currency") or "INR"),
             "status": status,
             "method": str(payment.get("method") or ""),
+            "method_hash": payment_fingerprint(payment),
             "paid_at": timestamp(payment.get("created_at")),
         },
     )
+    if created and status == Payment.Status.CAPTURED:
+        reward_for_payment(record)
     return record
 
 
@@ -337,6 +358,18 @@ def _advance_mock(subscription: Subscription) -> Subscription:
     if subscription.cancel_at_period_end:
         return apply_provider_status(subscription, "cancelled")
     start = subscription.current_period_end or subscription.trial_ends_at or now
-    return apply_provider_status(
+    renewed = apply_provider_status(
         subscription, "active", period_start=start, period_end=start + MOCK_PERIOD
     )
+    record_payment(renewed, _mock_payment(renewed), Payment.Status.CAPTURED)
+    return renewed
+
+
+def _mock_payment(subscription: Subscription) -> dict:
+    return {
+        "id": f"pay_mock_{uuid.uuid4().hex[:14]}",
+        "amount": subscription.plan.amount_in_minor_units(),
+        "currency": subscription.plan.currency,
+        "method": "upi",
+        "created_at": int(timezone.now().timestamp()),
+    }

@@ -33,6 +33,7 @@ from .services.auth import (
     safe_next,
     user_for_google,
 )
+from .services.deletion import close_account
 
 PANEL_TEMPLATE = "accounts/partials/auth_panel.html"
 PAGE_TEMPLATES = {
@@ -225,19 +226,16 @@ class DeleteAccountView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         user = self.request.user
-        # Drop every platform token before the cascade deletes the rows.
-        for account in user.connected_accounts.all():
-            account.disconnect()
+        close_account(user)
         audit(
             AuditLog.Action.ACCOUNT_DELETED,
-            actor=None,
+            actor=user,
             target_type="User",
             target_id=str(user.pk),
             request=self.request,
         )
         logout(self.request)
-        user.delete()
-        messages.success(self.request, "Your account and all associated data have been deleted.")
+        messages.success(self.request, "Your account has been deleted.")
         return super().form_valid(form)
 
 

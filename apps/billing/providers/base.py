@@ -60,9 +60,12 @@ class BillingProvider(abc.ABC):
 
     @abc.abstractmethod
     def create_subscription(
-        self, *, user, plan, customer_id: str, start_at: datetime | None
+        self, *, user, plan, customer_id: str, start_at: datetime | None, offer_id: str = ""
     ) -> SubscriptionState:
-        """Create a recurring subscription. ``start_at`` delays the first charge (trial)."""
+        """
+        Create a recurring subscription. ``start_at`` delays the first charge (trial,
+        free months); ``offer_id`` applies a provider discount offer.
+        """
 
     @abc.abstractmethod
     def fetch_subscription(self, subscription_id: str) -> SubscriptionState:

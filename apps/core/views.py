@@ -1,9 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views import View
 from django.views.generic import DetailView, TemplateView
 
-from .models import DataDeletionRequest
+from .models import DataDeletionRequest, Notification
 
 
 class LandingView(TemplateView):
@@ -25,7 +28,22 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         automations = self.request.user.automations.exclude(status=Automation.Status.ARCHIVED)
         context["automation_count"] = automations.count()
         context["active_automations"] = automations.filter(status=Automation.Status.ACTIVE).count()
+        context["notifications"] = self.request.user.notifications.filter(read_at__isnull=True)[:5]
         return context
+
+
+class NotificationDismissView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        if notification.read_at is None:
+            notification.read_at = timezone.now()
+            notification.save(update_fields=["read_at"])
+        target = request.POST.get("next", "")
+        if not url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
+            target = "core:dashboard"
+        return redirect(target)
 
 
 class PrivacyView(TemplateView):

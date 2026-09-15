@@ -97,6 +97,10 @@ def connect_account(user: User, identity: InstagramIdentity) -> ConnectedAccount
     audit(action, actor=user, target=account)
     user.advance_onboarding(User.Onboarding.INSTAGRAM_CONNECTED)
 
+    from apps.coupons.services import notify_matching_coupons
+
+    notify_matching_coupons(account)
+
     if newly_connected:
         from apps.core.queue import enqueue
 

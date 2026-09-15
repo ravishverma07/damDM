@@ -14,6 +14,12 @@ from django.views.generic import TemplateView
 
 from apps.core.models import AuditLog
 from apps.core.services import audit
+from apps.coupons.services import (
+    CouponError,
+    available_coupons,
+    coupon_for_checkout,
+    record_redemption,
+)
 
 from .models import BillingWebhookEvent, Plan, Subscription
 from .providers.base import WebhookVerificationError
@@ -45,6 +51,7 @@ class BillingView(LoginRequiredMixin, TemplateView):
             has_access=bool(subscription and subscription.has_access),
             eligibility=check_eligibility(self.request, user),
             payments=user.payments.all()[:12],
+            coupons=available_coupons(user),
         )
         return context
 
@@ -53,9 +60,15 @@ class StartCheckoutView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request):
+        coupon = None
+        code = request.POST.get("coupon", "").strip()
         try:
-            checkout = start_checkout(request, request.user)
-        except SubscriptionError as exc:
+            if code:
+                coupon = coupon_for_checkout(request.user, code)
+            checkout = start_checkout(request, request.user, coupon=coupon)
+            if coupon is not None:
+                record_redemption(coupon, request.user, checkout.subscription)
+        except (SubscriptionError, CouponError) as exc:
             messages.error(request, str(exc))
             return redirect("billing:overview")
 
@@ -166,7 +179,8 @@ def _started_message(subscription: Subscription) -> str:
     if subscription.status == Subscription.Status.TRIALING and subscription.trial_ends_at:
         first_charge = timezone.localtime(subscription.trial_ends_at)
         return (
-            f"Your 14-day free trial has started. ₹99/month begins on {first_charge:%d %b} "
+            f"You're all set. Your first ₹99 payment is on {first_charge:%d %b %Y}, "
             "unless you cancel before then."
         )
     return "You're subscribed. Automations can run now."
+

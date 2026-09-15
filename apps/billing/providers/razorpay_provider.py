@@ -55,7 +55,7 @@ class RazorpayBillingProvider(BillingProvider):
         })
         return str(data["id"])
 
-    def create_subscription(self, *, user, plan, customer_id, start_at):
+    def create_subscription(self, *, user, plan, customer_id, start_at, offer_id=""):
         if self.mock:
             return SubscriptionState(
                 provider=self.name,
@@ -76,6 +76,8 @@ class RazorpayBillingProvider(BillingProvider):
         }
         if start_at:
             body["start_at"] = int(start_at.timestamp())
+        if offer_id:
+            body["offer_id"] = offer_id
         return self.state_from_entity(self._request("POST", "/subscriptions", body))
 
     def fetch_subscription(self, subscription_id):

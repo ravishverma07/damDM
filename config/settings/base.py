@@ -62,6 +62,8 @@ LOCAL_APPS = [
     "apps.messaging",
     "apps.analytics",
     "apps.billing",
+    "apps.referrals",
+    "apps.coupons",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -191,6 +193,10 @@ CELERY_BEAT_SCHEDULE = {
     "instagram-process-pending-data-deletions": {
         "task": "apps.instagram.tasks.process_pending_data_deletions",
         "schedule": crontab(minute=20),
+    },
+    "billing-release-referral-rewards": {
+        "task": "apps.referrals.tasks.release_referral_rewards",
+        "schedule": crontab(minute=35),
     },
     "billing-sync-subscriptions": {
         "task": "apps.billing.tasks.sync_subscriptions",

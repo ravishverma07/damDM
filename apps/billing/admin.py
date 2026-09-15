@@ -88,3 +88,4 @@ class TrialClaimAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "ip_hash")
     readonly_fields = ("user", "subscription", "ip_hash", "created_at", "updated_at")
     inlines = [TrialFingerprintInline]
+

@@ -58,6 +58,9 @@ def sync_account(account: ConnectedAccount, *, graph: InstagramGraph | None = No
             "followers_count", "app_scoped_user_id", "last_synced_at", "last_error", "updated_at",
         ]
     )
+    from apps.coupons.services import notify_matching_coupons
+
+    notify_matching_coupons(account)  # the username may have just changed
     return result
 
 
