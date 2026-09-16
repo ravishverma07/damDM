@@ -1,0 +1,35 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Guide</p>
+  <h1 class="hero__title mk-hero__title">{{ guide.title }}</h1>
+  <p class="guide-meta">
+    <span>By the {{ APP_NAME }} team</span>
+    <span>Updated <time datetime="{{ guide.updated|date:'Y-m-d' }}">{{ guide.updated|date:"j M Y" }}</time></span>
+    <span>{{ guide.read_minutes }} min read</span>
+  </p>
+{% endblock %}
+
+{% block body %}
+  <article class="section mk-section--tight">
+    <div class="container container--narrow prose mk-prose mk-article">
+      {% include guide.template_name %}
+    </div>
+  </article>
+
+  {% if more_guides %}
+    <section class="section section--tinted">
+      <div class="container">
+        <h2 class="section__title">More guides</h2>
+        <div class="guide-grid">
+          {% for item in more_guides %}
+            <a class="guide-card" href="{% url 'marketing:guide' slug=item.slug %}">
+              <span class="guide-card__meta">{{ item.read_minutes }} min read</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.summary }}</p>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

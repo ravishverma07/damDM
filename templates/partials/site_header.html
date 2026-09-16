@@ -3,6 +3,11 @@
     <a href="{% url 'core:landing' %}" class="brand">
       {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
     </a>
+    <nav class="site-nav site-nav--pages" aria-label="Main">
+      <a href="{% url 'marketing:features' %}" class="site-nav__link">Features</a>
+      <a href="{% url 'marketing:pricing' %}" class="site-nav__link">Pricing</a>
+      <a href="{% url 'marketing:guides' %}" class="site-nav__link">Guides</a>
+    </nav>
     <nav class="site-nav" aria-label="Account">
       <button type="button" class="icon-button theme-toggle" data-theme-toggle aria-label="Switch light or dark mode">
         <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>

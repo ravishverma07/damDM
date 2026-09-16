@@ -1,0 +1,29 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>{{ eyebrow }}</p>
+  <h1 class="hero__title mk-hero__title">{{ heading }}</h1>
+  <p class="hero__lead">{{ lead }}</p>
+  {% include "marketing/partials/hero_actions.html" %}
+{% endblock %}
+
+{% block body %}
+  <section class="section section--tinted">
+    <div class="container">
+      {% include "marketing/partials/card_grid.html" %}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {% if kind == "features" %}
+        <p class="eyebrow eyebrow--center">Use cases</p>
+        <h2 class="section__title">See it for your business</h2>
+        {% include "marketing/partials/card_grid.html" with cards=use_cases card_url="marketing:use-case" %}
+      {% else %}
+        <p class="eyebrow eyebrow--center">Features</p>
+        <h2 class="section__title">Everything included in one plan</h2>
+        {% include "marketing/partials/card_grid.html" with cards=features card_url="marketing:feature" %}
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

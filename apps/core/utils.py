@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import secrets
 import string
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from django.conf import settings
 from django.utils import timezone
@@ -48,7 +48,8 @@ def month_period(moment: datetime | date | None = None) -> tuple[date, date]:
     """
     moment = moment or timezone.now()
     if isinstance(moment, datetime):
-        moment = timezone.localtime(moment).date() if timezone.is_aware(moment) else moment.date()
+        # Always UTC, whatever timezone the page is being shown in.
+        moment = moment.astimezone(UTC).date() if timezone.is_aware(moment) else moment.date()
     start = moment.replace(day=1)
     if start.month == 12:
         end = start.replace(year=start.year + 1, month=1)

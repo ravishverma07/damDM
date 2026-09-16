@@ -202,6 +202,33 @@ class GoogleCallbackView(View):
         return redirect(safe_next(request, state.redirect_to) or reverse("core:dashboard"))
 
 
+class GoogleOneTapView(View):
+    """Receives the ID token from Google One Tap and signs the person in."""
+
+    http_method_names = ["post"]
+
+    def post(self, request):
+        if not google.one_tap_enabled():
+            return redirect(_signin_url())
+        try:
+            identity = google.verify_one_tap(
+                request.POST.get("credential", ""), device_id=request.device_id
+            )
+            user, password_disabled = user_for_google(identity)
+        except (SocialAuthError, google.GoogleOAuthError) as exc:
+            messages.error(request, str(exc))
+            return redirect(_signin_url())
+
+        complete_login(request, user, method="google_one_tap")
+        if password_disabled:
+            messages.warning(
+                request,
+                "Signed in with Google. Your email hadn't been confirmed, so its password was "
+                "turned off. Keep using Google, or reset your password to set a new one.",
+            )
+        return redirect(safe_next(request, request.POST.get("next")) or reverse("core:dashboard"))
+
+
 class ProfileView(LoginRequiredMixin, FormView):
     template_name = "accounts/profile.html"
     form_class = ProfileForm

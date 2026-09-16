@@ -65,7 +65,7 @@
     <section class="card pricing-card">
       {% if eligibility.eligible %}<span class="pricing-card__tag">14 days free</span>{% endif %}
       <p class="pricing-card__name">{{ APP_NAME }} Pro</p>
-      <p class="pricing-card__price">₹99<span>/month</span></p>
+      {% include "partials/price.html" %}
       <ul class="pricing-card__features">
         <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited DMs and replies</li>
         <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited automations</li>
@@ -102,8 +102,9 @@
         </form>
         {% if eligibility.eligible %}
           <p class="pricing-card__note">
-            ₹0 today. You'll approve UPI AutoPay for ₹99/month, starting after 14 days.
-            Cancel before then and you won't be charged.
+            You'll approve UPI AutoPay for ₹99/month, starting after 14 days.
+            Cancel before then and you won't be charged. A ₹5 verification charge
+            is taken today and refunded automatically.
           </p>
         {% else %}
           <p class="pricing-card__note">{{ eligibility.message }} You can still subscribe; the first payment is taken today.</p>

@@ -1,0 +1,24 @@
+{% comment %}
+  Search and link-preview tags. Pages set seo_title / seo_description / structured_data
+  in their context; everything else falls back to the site defaults.
+{% endcomment %}
+{% with description=seo_description|default:"Auto-reply to Instagram comments, DMs and stories, and send links by DM. Official Instagram API. 14 days free, then ₹99/month." title=seo_title|default:"Auto-reply to Instagram comments and DMs" %}
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ CANONICAL_URL }}">
+{% if user.is_authenticated or noindex %}<meta name="robots" content="noindex">{% endif %}
+<meta property="og:type" content="{% if guide %}article{% else %}website{% endif %}">
+<meta property="og:site_name" content="{{ APP_NAME }}">
+<meta property="og:locale" content="en_IN">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ CANONICAL_URL }}">
+<meta property="og:image" content="{{ SHARE_IMAGE_URL }}">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="{{ APP_NAME }} logo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+<meta name="twitter:image" content="{{ SHARE_IMAGE_URL }}">
+{% endwith %}
+{% if structured_data %}<script type="application/ld+json">{{ structured_data }}</script>{% endif %}

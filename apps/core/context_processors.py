@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.templatetags.static import static
 from django.urls import reverse
 
 
@@ -8,7 +9,22 @@ def app_meta(request):
         "APP_NAME": settings.APP_NAME,
         "APP_VENDOR": settings.APP_VENDOR,
         "APP_BASE_URL": settings.APP_BASE_URL,
+        # Search engines and link previews always get the public domain.
+        "CANONICAL_URL": f"{settings.APP_BASE_URL}{request.path}",
+        "SHARE_IMAGE_URL": f"{settings.APP_BASE_URL}{static('img/icon-512.png')}",
+        "BUSINESS_LEGAL_NAME": settings.BUSINESS_LEGAL_NAME,
+        "SUPPORT_EMAIL": settings.SUPPORT_EMAIL,
+        "PRIVACY_EMAIL": settings.PRIVACY_EMAIL,
+        "PLAN_PRICE": settings.PLAN_PRICE,
+        "PLAN_LIST_PRICE": settings.PLAN_LIST_PRICE,
+        "PLAN_DISCOUNT_PERCENT": _discount_percent(settings.PLAN_PRICE, settings.PLAN_LIST_PRICE),
+        "SUPPORT_PHONE": settings.SUPPORT_PHONE,
+        "BUSINESS_ADDRESS": settings.BUSINESS_ADDRESS,
     }
+
+
+def _discount_percent(price: int, list_price: int) -> int:
+    return round((list_price - price) * 100 / list_price) if list_price > price else 0
 
 
 #: (key, label, url name). The key doubles as the icon name.

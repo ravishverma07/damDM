@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Refund &amp; Cancellation Policy · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1>Refund &amp; Cancellation Policy</h1>
+  <p class="text-sm muted">Last updated 16 September 2026</p>
+
+  <p>
+    {{ APP_NAME }} is a subscription service provided by {{ BUSINESS_LEGAL_NAME }}. The Pro plan
+    costs <strong>₹99 per month</strong> (inclusive of applicable taxes) and is billed through
+    Razorpay using UPI AutoPay, cards or netbanking. {{ APP_NAME }} is a digital service; nothing
+    is shipped.
+  </p>
+
+  <h2>Free trial</h2>
+  <ul>
+    <li>New customers get a 14-day free trial. You approve an AutoPay mandate when you start, but
+      the first ₹99 is only charged when the trial ends.</li>
+    <li>Your bank or Razorpay may take a small verification amount to set up the mandate. It is
+      refunded automatically.</li>
+    <li>If you cancel before the trial ends, you are not charged.</li>
+  </ul>
+
+  <h2>Cancelling</h2>
+  <ul>
+    <li>You can cancel at any time from <strong>Plan &amp; billing</strong> in your account.
+      Cancelling stops all future charges.</li>
+    <li>After you cancel, you keep access until the end of the trial or the month you have
+      already paid for.</li>
+    <li>You can also revoke the AutoPay mandate from your UPI app or bank. This stops future
+      charges in the same way.</li>
+  </ul>
+
+  <h2>Refunds</h2>
+  <ul>
+    <li>Monthly payments are generally non-refundable once the month has started, because the
+      service is available to you straight away.</li>
+    <li>We refund in full if you were charged twice for the same month, charged after you
+      cancelled, or charged because of an error on our side.</li>
+    <li>If the service was unavailable for a long period because of a fault on our side, write
+      to us and we will review a full or partial refund.</li>
+    <li>To request a refund, email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>
+      within 7 days of the charge, with your account email and the payment date.</li>
+  </ul>
+
+  <h2>How refunds are paid</h2>
+  <p>
+    We reply to refund requests within 2 business days. Approved refunds go back to the original
+    payment method (UPI, card or bank account) and usually arrive within 5–7 business days,
+    depending on your bank.
+  </p>
+
+  <h2>Questions</h2>
+  <p>
+    See our <a href="{% url 'core:contact' %}">contact page</a> or email
+    <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.
+  </p>
+</article>
+{% endblock %}

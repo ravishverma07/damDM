@@ -1,0 +1,8 @@
+<div class="faq-list">
+  {% for faq in faq_items|default:faqs %}
+    <details class="faq-item"{% if forloop.first and not faq_items %} open{% endif %}>
+      <summary>{{ faq.question }}{% include "partials/icon.html" with name="chevron" size=18 %}</summary>
+      <p>{{ faq.answer }}</p>
+    </details>
+  {% endfor %}
+</div>

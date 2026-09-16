@@ -1,4 +1,5 @@
 import pytest
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.test import Client
 from django.urls import reverse
@@ -77,4 +78,4 @@ def test_delete_page_explains_what_happens(client, user):
     client.force_login(user)
     body = client.get(reverse("accounts:delete-account")).content.decode()
     assert "cancel it first" in body
-    assert "privacy@dammai.in" in body
+    assert settings.PRIVACY_EMAIL in body

@@ -1,4 +1,7 @@
-from .services.auth import AUTH_MODES, build_auth_panel
+from django.conf import settings
+
+from .services import google
+from .services.auth import AUTH_MODES, build_auth_panel, safe_next
 
 
 def auth_panel(request):
@@ -18,4 +21,13 @@ def auth_panel(request):
         next_url=request.GET.get("next"),
     )
     panel["auto_open"] = requested in AUTH_MODES
-    return {"auth_panel": panel}
+    context = {"auth_panel": panel}
+    if google.one_tap_enabled():
+        context["google_one_tap"] = {
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "nonce": google.one_tap_nonce(getattr(request, "device_id", "")),
+            # Stay on content pages after signing in; the home page goes to the dashboard.
+            "next": safe_next(request, request.GET.get("next"))
+            or ("" if request.path == "/" else request.get_full_path()),
+        }
+    return context

@@ -1,0 +1,45 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Compare</p>
+  <h1 class="hero__title mk-hero__title">A simpler, more affordable Instagram DM automation tool</h1>
+  <p class="hero__lead">Paying too much, or stuck learning a complicated flow builder? {{ APP_NAME }} does what most creators and businesses need, for ₹{{ PLAN_PRICE }}/month.</p>
+  {% include "marketing/partials/hero_actions.html" %}
+{% endblock %}
+
+{% block body %}
+  <section class="section section--tinted">
+    <div class="container container--narrow">
+      <p class="eyebrow eyebrow--center">At a glance</p>
+      <h2 class="section__title">{{ APP_NAME }} compared with other tools</h2>
+      {% include "marketing/partials/compare_table.html" %}
+      <p class="mk-footnote">Other tools differ, so check their current plans. This compares what we commonly see across the category.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container--narrow prose mk-prose">
+      <h2>When {{ APP_NAME }} is a good fit</h2>
+      <ul class="mk-checklist">
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>You mainly want comment-to-DM, keyword replies and story automations.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>You'd rather pay one fixed price in rupees than per contact in dollars.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>You want to pay by UPI AutoPay.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>You want to go live in minutes with ready-made templates.</span></li>
+      </ul>
+
+      <h2>When another tool may suit you better</h2>
+      <p>
+        {{ APP_NAME }} focuses on Instagram. If you need one tool that also runs Facebook Messenger,
+        WhatsApp or SMS campaigns, or very large multi-branch chatbot flows, a bigger platform may
+        be a better choice.
+      </p>
+
+      <h2>Switching takes a few minutes</h2>
+      <ol class="mk-steps-list">
+        <li>Start your free trial and connect your Instagram professional account.</li>
+        <li>Recreate your main automations from our templates: <a href="{% url 'marketing:feature' slug='comment-to-dm' %}">comment to DM</a>, <a href="{% url 'marketing:feature' slug='follow-to-unlock' %}">follow to unlock</a> and <a href="{% url 'marketing:feature' slug='dm-keyword-auto-reply' %}">DM keywords</a>.</li>
+        <li>Turn off the same automations in your old tool, so people don't get two replies.</li>
+        <li>Cancel your old plan once everything is running.</li>
+      </ol>
+    </div>
+  </section>
+{% endblock %}

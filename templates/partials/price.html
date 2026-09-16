@@ -1,0 +1,6 @@
+{# The Pro price, with the struck-through list price when a launch discount is on. #}
+<p class="pricing-card__price">
+  {% if PLAN_DISCOUNT_PERCENT %}<s class="pricing-card__was" aria-label="Was ₹{{ PLAN_LIST_PRICE }}">₹{{ PLAN_LIST_PRICE }}</s>{% endif %}
+  ₹{{ PLAN_PRICE }}<span>/month</span>
+  {% if PLAN_DISCOUNT_PERCENT %}<span class="pricing-card__off">{{ PLAN_DISCOUNT_PERCENT }}% off</span>{% endif %}
+</p>

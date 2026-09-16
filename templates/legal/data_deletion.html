@@ -9,16 +9,18 @@
     <li>
       Cancel any plan on <strong>Plan &amp; billing</strong>, then choose
       <strong>Delete account</strong> to close your account. Account records are kept as described
-      in our Privacy Policy.
+      in our <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
     </li>
     <li>
       You can also remove {{ APP_NAME }} from Instagram under
-      <em>Settings → Website permissions → Apps and websites</em>. We honour Meta's
-      deauthorize callback and delete the connection automatically.
+      <em>Settings and activity → Website permissions → Apps and websites</em>. We're notified
+      automatically, delete the stored access token and pause that account's automations. To have
+      that account's data deleted as well, request data deletion from the same screen; you'll get a
+      confirmation code and a page to track it.
     </li>
   </ol>
   <p>
-    Prefer email? Write to <a href="mailto:privacy@dammai.in">privacy@dammai.in</a>
+    Prefer email? Write to <a href="mailto:{{ PRIVACY_EMAIL }}">{{ PRIVACY_EMAIL }}</a>
     to have your personal data erased, and we will do it within 30 days.
   </p>
 </article>

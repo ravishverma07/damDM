@@ -13,7 +13,7 @@
   </p>
   <p class="text-sm muted">
     Account records are kept as described in our <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
-    To have your personal data erased, email <a href="mailto:privacy@dammai.in">privacy@dammai.in</a>.
+    To have your personal data erased, email <a href="mailto:{{ PRIVACY_EMAIL }}">{{ PRIVACY_EMAIL }}</a>.
   </p>
   <form method="post" novalidate>
     {% include "partials/form.html" %}

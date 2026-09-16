@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect, render
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -83,6 +84,9 @@ class StartCheckoutView(LoginRequiredMixin, View):
             "subscription": subscription,
             "trial": checkout.trial,
             "razorpay_key": settings.RAZORPAY_KEY_ID,
+            "razorpay_theme_color": settings.RAZORPAY_THEME_COLOR,
+            # Razorpay loads the logo itself, so it needs the full public URL.
+            "razorpay_logo": request.build_absolute_uri(static("img/icon-512.png")),
             "confirm_url": reverse("billing:confirm"),
         })
 

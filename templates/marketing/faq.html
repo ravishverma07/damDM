@@ -1,0 +1,17 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>FAQ</p>
+  <h1 class="hero__title mk-hero__title">Frequently asked questions</h1>
+  <p class="hero__lead">Everything about {{ APP_NAME }}, Instagram's rules, the free trial and billing. Can't find an answer? <a href="{% url 'core:contact' %}">Contact us</a>.</p>
+{% endblock %}
+
+{% block body %}
+  <section class="section mk-section--tight">
+    <div class="container container--narrow">
+      {% for group_title, group_faqs in faq_groups %}
+        <h2 class="mk-faq-group">{{ group_title }}</h2>
+        {% include "marketing/partials/faq_list.html" with faq_items=group_faqs %}
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

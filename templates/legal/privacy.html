@@ -3,28 +3,151 @@
 {% block content %}
 <article class="prose">
   <h1>Privacy Policy</h1>
-  <p class="text-sm muted">Placeholder — replace with reviewed legal copy before launch.</p>
+  <p class="text-sm muted">Last updated 17 September 2026</p>
+
+  <p>
+    This policy explains what personal data {{ BUSINESS_LEGAL_NAME }} ("{{ APP_NAME }}", "we", "us")
+    collects when you use {{ APP_BASE_URL }} and the {{ APP_NAME }} service, why, and the choices you
+    have. We process personal data in line with India's Digital Personal Data Protection Act, 2023 and
+    other applicable laws.
+  </p>
 
   <h2>What we collect</h2>
+  <h3>About you, the account holder</h3>
   <ul>
-    <li>Your email address and name.</li>
-    <li>Your Instagram professional account ID, username and profile picture URL.</li>
-    <li>An encrypted Instagram access token, used only to call Meta's official APIs.</li>
-    <li>Comments and messages processed by your automations.</li>
+    <li><strong>Account details:</strong> your email address, name and, if you use a password, a securely
+      hashed version of it (never the password itself).</li>
+    <li><strong>Sign-in with Google:</strong> your Google account ID, email address, name and profile
+      picture, as shared by Google.</li>
+    <li><strong>Instagram connection:</strong> your Instagram professional account ID, username, profile
+      picture, basic details of your posts, and an access token that we store encrypted and use only to call
+      Meta's official API. We never ask for or store your Instagram password.</li>
+    <li><strong>Your automations:</strong> the keywords, replies, messages and links you set up.</li>
+    <li><strong>Billing:</strong> your plan, subscription status and payment history (amount, date, method
+      type such as UPI or card, and Razorpay's reference numbers). Razorpay handles your payment details;
+      we never see or store your full card number, UPI PIN or bank login.</li>
+    <li><strong>Trial and referral checks:</strong> to stop the free trial or referral rewards being claimed
+      more than once, we keep one-way hashes (fingerprints) of your email, Google and Instagram account IDs,
+      browser ID, and the UPI ID or saved card behind your AutoPay. A hash can't be turned back into the
+      original value.</li>
+    <li><strong>Referral payouts:</strong> the UPI ID you give us for withdrawals, stored encrypted.</li>
+    <li><strong>Technical data:</strong> a hashed (not raw) IP address, your browser type, timezone, and
+      records of sign-ins and important account actions, for security.</li>
+    <li><strong>Messages to us:</strong> anything you send when you contact support.</li>
   </ul>
 
-  <h2>What we never collect</h2>
-  <ul>
-    <li>Instagram passwords. We never ask for them and cannot accept them.</li>
-    <li>Raw IP addresses for link clicks — only a salted hash.</li>
-  </ul>
-
-  <h2>Deleting your data</h2>
+  <h3>About people who interact with your Instagram account</h3>
   <p>
-    Deleting your account in {{ APP_NAME }} closes it and signs you out; we keep your account
-    records. To have your personal data erased, email
-    <a href="mailto:privacy@dammai.in">privacy@dammai.in</a>; we complete erasure requests within
-    30 days. See <a href="{% url 'core:data-deletion' %}">data deletion</a>.
+    To run your automations, {{ APP_NAME }} receives from Meta the comments, messages, story replies and
+    mentions that people send to your account, along with their Instagram username, profile picture and
+    Instagram-scoped ID. When they tap a link we sent, we record the click with a hashed IP address and
+    browser type. We process this data on your behalf and on your instructions, only to provide the
+    service to you. If you use {{ APP_NAME }}, you are responsible for telling your audience how you use
+    their data where the law requires it.
+  </p>
+
+  <h2>How we use it</h2>
+  <ul>
+    <li>to provide the service: sign you in, connect Instagram, run automations and show you results;</li>
+    <li>to take payments, manage your plan and trial, and pay referral rewards;</li>
+    <li>to prevent fraud and abuse, including repeat trials and self-referrals;</li>
+    <li>to keep the service secure and fix problems;</li>
+    <li>to send you messages about your account, billing and important changes; and</li>
+    <li>to meet legal, tax and accounting obligations.</li>
+  </ul>
+  <p>
+    We use your data because you have agreed to it when signing up, because it is needed to provide the
+    service you asked for, or because the law requires it. We don't sell your personal data, and we don't
+    use it for advertising.
+  </p>
+
+  <h2>Who we share it with</h2>
+  <p>We share data only with service providers who help us run {{ APP_NAME }}, and only as much as they need:</p>
+  <ul>
+    <li><strong>Meta (Instagram)</strong>, to connect your account and send and receive messages;</li>
+    <li><strong>Google</strong>, if you choose to sign in with Google;</li>
+    <li><strong>Razorpay</strong>, to process payments and AutoPay;</li>
+    <li><strong>Cloudflare</strong> and our hosting providers, to deliver and protect the website; and</li>
+    <li>authorities, when the law requires it, or to protect our users or the service from fraud or harm.</li>
+  </ul>
+  <p>Some of these providers may process data outside India, with appropriate safeguards.</p>
+
+  <h2>Cookies and similar technology</h2>
+  <p>We use only the cookies needed to run the site:</p>
+  <ul>
+    <li><strong>Sign-in and security</strong> (<code>sessionid</code>, <code>csrftoken</code>): keep you
+      signed in and protect forms.</li>
+    <li><strong>Browser ID</strong> (<code>damdm_device</code>): a random ID used to prevent free-trial and
+      referral abuse.</li>
+    <li><strong>Referral</strong> (<code>damdm_ref</code>): remembers an invite link for 30 days.</li>
+    <li><strong>Timezone</strong> (<code>damdm_tz</code>): shows dates in your local time.</li>
+    <li><strong>Theme</strong>: your light or dark mode choice, saved in your browser.</li>
+  </ul>
+  <p>
+    Google (for sign-in) and Razorpay (at checkout) may set their own cookies under their own policies.
+    We don't use advertising or third-party tracking cookies.
+  </p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li><strong>While your account is open</strong>, we keep your data to provide the service.</li>
+    <li><strong>Disconnecting Instagram</strong>, in {{ APP_NAME }} or by removing {{ APP_NAME }} in
+      Instagram's settings, deletes the stored access token immediately and pauses that account's
+      automations.</li>
+    <li><strong>A data deletion request</strong> made through Instagram deletes that Instagram account's
+      connection, posts, contacts, comments and messages from {{ APP_NAME }}, usually within an hour. You get
+      a confirmation code to check its progress.</li>
+    <li><strong>Deleting your account</strong> in {{ APP_NAME }} closes it and signs you out; your records are
+      kept. To have your personal data erased, email us (see below) and we will do so within 30 days.</li>
+    <li><strong>Payment and tax records</strong> are kept for as long as Indian law requires, usually up to
+      8 years, even after erasure.</li>
+    <li><strong>Trial and referral fingerprints</strong> (hashes only) are kept after an account is deleted,
+      so the same person can't claim a new free trial or referral reward.</li>
+  </ul>
+
+  <h2>How we protect it</h2>
+  <p>
+    We use HTTPS for all traffic, encrypt Instagram tokens and UPI IDs at rest, store passwords and
+    fingerprints only as hashes, and limit who can access personal data. No system is perfectly secure; if a
+    breach affects your data, we will tell you and the authorities as the law requires.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>You can ask us to:</p>
+  <ul>
+    <li>tell you what personal data we hold about you and how we use it;</li>
+    <li>correct or update it (you can change most details yourself in <strong>Settings</strong>);</li>
+    <li>erase it, subject to the records we must keep by law;</li>
+    <li>withdraw your consent, for example by disconnecting Instagram or closing your account; and</li>
+    <li>nominate someone to exercise these rights for you in case of death or incapacity.</li>
+  </ul>
+  <p>
+    Email <a href="mailto:{{ PRIVACY_EMAIL }}">{{ PRIVACY_EMAIL }}</a> from your account's email address.
+    We reply within 30 days. See also <a href="{% url 'core:data-deletion' %}">data deletion instructions</a>.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    {{ APP_NAME }} is for people aged 18 and over. We don't knowingly collect data from children. If you
+    believe a child has given us personal data, contact us and we will delete it.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    We may update this policy. If a change is significant, we will tell you by email or in the app before it
+    takes effect. The date at the top shows the latest version.
+  </p>
+
+  <h2>Contact and grievances</h2>
+  <p>
+    For privacy questions or complaints, contact our Grievance Officer:<br>
+    {{ BUSINESS_LEGAL_NAME }}<br>
+    {% if BUSINESS_ADDRESS %}{{ BUSINESS_ADDRESS }}<br>{% endif %}
+    Email: <a href="mailto:{{ PRIVACY_EMAIL }}">{{ PRIVACY_EMAIL }}</a>
+    {% if SUPPORT_PHONE %}<br>Phone: <a href="tel:{{ SUPPORT_PHONE|cut:' ' }}">{{ SUPPORT_PHONE }}</a>{% endif %}
+  </p>
+  <p>
+    If you're not satisfied with our response, you can complain to the Data Protection Board of India.
   </p>
 </article>
 {% endblock %}

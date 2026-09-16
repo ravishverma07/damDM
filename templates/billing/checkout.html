@@ -5,13 +5,19 @@
   <span class="checkout__icon">{% include "partials/icon.html" with name="card" size=26 %}</span>
   <h1>{% if trial %}Start your free trial{% else %}Subscribe to {{ APP_NAME }} Pro{% endif %}</h1>
   <p class="muted">
-    {% if trial %}
-      Approve UPI AutoPay for ₹99/month. <strong>Nothing is charged today</strong>; the first
-      payment is on {{ subscription.trial_ends_at|date:"j M Y" }}. Cancel any time before then.
+    {% if subscription.trial_ends_at %}
+      Approve UPI AutoPay for {% if PLAN_DISCOUNT_PERCENT %}<s>₹{{ PLAN_LIST_PRICE }}</s> {% endif %}₹99/month. Your first ₹99 payment is on
+      <strong>{{ subscription.trial_ends_at|date:"j M Y" }}</strong>. Cancel any time before then.
     {% else %}
-      Approve UPI AutoPay for ₹99/month. Your first payment is taken now.
+      Approve UPI AutoPay for {% if PLAN_DISCOUNT_PERCENT %}<s>₹{{ PLAN_LIST_PRICE }}</s> {% endif %}₹99/month. Your first payment is taken now.
     {% endif %}
   </p>
+  {% if subscription.trial_ends_at %}
+    <p class="checkout__note" role="note">
+      To verify your UPI ID or card, {{ APP_NAME }} charges <strong>₹5</strong> today. It is
+      <strong>refunded automatically</strong>, usually within 5–7 working days.
+    </p>
+  {% endif %}
   <button type="button" class="btn btn--primary btn--block btn--large" data-open-checkout>Continue to payment</button>
   <a href="{% url 'billing:overview' %}" class="btn btn--block checkout__back">Back</a>
 
@@ -31,9 +37,10 @@
       key: "{{ razorpay_key|escapejs }}",
       subscription_id: "{{ subscription.provider_subscription_id|escapejs }}",
       name: "{{ APP_NAME|escapejs }}",
+      image: "{{ razorpay_logo|escapejs }}",
       description: "{% if trial %}14-day free trial, then ₹99/month{% else %}Pro · ₹99/month{% endif %}",
       prefill: { name: "{{ user.full_name|escapejs }}", email: "{{ user.email|escapejs }}" },
-      theme: { color: "#dd2a7b" },
+      theme: { color: "{{ razorpay_theme_color|escapejs }}" },
       handler: function (response) {
         form.elements.razorpay_payment_id.value = response.razorpay_payment_id;
         form.elements.razorpay_subscription_id.value = response.razorpay_subscription_id;

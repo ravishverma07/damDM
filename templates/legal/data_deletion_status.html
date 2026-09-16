@@ -4,18 +4,18 @@
 <article class="prose">
   <h1>Data deletion request</h1>
   <p>Confirmation code: <code>{{ deletion.confirmation_code }}</code></p>
-  <p class="muted">Requested {{ deletion.created_at|date:"j M Y, H:i" }} UTC.</p>
+  <p class="muted">Requested {{ deletion.created_at|date:"j M Y, H:i T" }}.</p>
 
   {% if deletion.status == "completed" %}
     <p>
-      <strong>Completed</strong> on {{ deletion.completed_at|date:"j M Y, H:i" }} UTC. All data
+      <strong>Completed</strong> on {{ deletion.completed_at|date:"j M Y, H:i T" }}. All data
       {{ APP_NAME }} held for this Instagram account has been deleted.
     </p>
   {% elif deletion.status == "failed" %}
     <p>
       <strong>Delayed.</strong> We hit a problem and will retry automatically. If this page
       doesn't update within a day, email
-      <a href="mailto:privacy@dammai.in">privacy@dammai.in</a> with the code above.
+      <a href="mailto:{{ PRIVACY_EMAIL }}">{{ PRIVACY_EMAIL }}</a> with the code above.
     </p>
   {% else %}
     <p><strong>In progress.</strong> Deletion normally completes within an hour.</p>

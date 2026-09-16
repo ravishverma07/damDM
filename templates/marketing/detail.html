@@ -1,0 +1,61 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>{{ eyebrow }}</p>
+  <h1 class="hero__title mk-hero__title">{{ page.title }}</h1>
+  <p class="hero__lead">{{ page.lead }}</p>
+  {% include "marketing/partials/hero_actions.html" %}
+{% endblock %}
+
+{% block body %}
+  {% if page.steps %}
+    <section class="section">
+      <div class="container">
+        <p class="eyebrow eyebrow--center">How it works</p>
+        <h2 class="section__title">Set up in three steps</h2>
+        <ol class="steps">
+          {% for step_title, step_text in page.steps %}
+            <li class="step-card">
+              <span class="step-card__num">{{ forloop.counter }}</span>
+              <h3>{{ step_title }}</h3>
+              <p>{{ step_text }}</p>
+            </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="section section--tinted">
+    <div class="container mk-split{% if not page.example %} mk-split--single{% endif %}">
+      <div class="prose mk-prose">
+        {% for section in page.sections %}
+          <h2>{{ section.heading }}</h2>
+          {% for paragraph in section.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+          {% if section.bullets %}
+            <ul class="mk-checklist">
+              {% for bullet in section.bullets %}<li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>{{ bullet }}</span></li>{% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% if page.example %}
+        <div class="mk-split__aside">{% include "marketing/partials/example.html" with example=page.example %}</div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if related %}
+    <section class="section">
+      <div class="container">
+        <p class="eyebrow eyebrow--center">{% if eyebrow == "Use case" %}Features to use{% else %}Works well with{% endif %}</p>
+        <h2 class="section__title">{% if eyebrow == "Use case" %}The automations that fit{% else %}Related features{% endif %}</h2>
+        {% include "marketing/partials/card_grid.html" with cards=related card_url="marketing:feature" %}
+        <p class="mk-more-links">
+          <a href="{% url 'marketing:features' %}">All features</a>
+          <a href="{% url 'marketing:use-cases' %}">Use cases</a>
+          <a href="{% url 'marketing:guides' %}">Guides</a>
+        </p>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

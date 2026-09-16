@@ -161,7 +161,14 @@ def confirm_checkout(
         state = provider.fetch_subscription(subscription_id)
     except BillingError as exc:
         raise SubscriptionError(str(exc)) from exc
-    return apply_state(subscription, state)
+    # The mandate payment carries the UPI ID or card, so a repeat trial is caught now
+    # rather than at the first charge. Not recorded as a Payment: it only sets up the mandate.
+    try:
+        payment = provider.fetch_payment(payment_id)
+    except BillingError:
+        logger.exception("Could not fetch mandate payment %s", payment_id)
+        payment = None
+    return apply_state(subscription, state, payment=payment)
 
 
 def cancel_subscription(user) -> Subscription:

@@ -1,6 +1,7 @@
 import re
 
 import pytest
+from django.conf import settings
 from django.urls import reverse
 
 pytestmark = pytest.mark.django_db
@@ -66,3 +67,33 @@ def test_favicon_ico_redirects_to_the_png(client):
     response = client.get("/favicon.ico")
     assert response.status_code == 301
     assert response["Location"].endswith("img/favicon-32.png")
+
+
+@pytest.mark.parametrize(
+    ("url_name", "heading"),
+    [("core:refunds", "Refund &amp; Cancellation Policy"), ("core:contact", "Contact Us")],
+)
+def test_payment_policy_pages_are_public_and_linked(client, url_name, heading):
+    body = client.get(reverse(url_name)).content.decode()
+    assert heading in body
+    assert settings.SUPPORT_EMAIL in body
+    assert reverse("core:refunds") in body and reverse("core:contact") in body  # footer
+
+
+def test_pricing_shows_the_launch_discount(client, settings):
+    body = client.get(reverse("marketing:pricing")).content.decode()
+    assert "<s class=\"pricing-card__was\"" in body and "₹199" in body and "50% off" in body
+    settings.PLAN_LIST_PRICE = 0
+    body = client.get(reverse("marketing:pricing")).content.decode()
+    assert "% off" not in body and "₹99" in body
+
+
+def test_home_screen_uses_the_app_name_and_logo(client):
+    body = client.get(reverse("core:landing")).content.decode()
+    assert '<meta name="apple-mobile-web-app-title" content="DamDM">' in body
+    assert f'rel="manifest" href="{reverse("core:manifest")}"' in body
+    response = client.get(reverse("core:manifest"))
+    assert response["Content-Type"] == "application/manifest+json"
+    manifest = response.json()
+    assert manifest["name"] == manifest["short_name"] == "DamDM"
+    assert {icon["sizes"] for icon in manifest["icons"]} == {"192x192", "512x512"}

@@ -1,0 +1,38 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Pricing</p>
+  <h1 class="hero__title mk-hero__title">Simple pricing. Everything unlimited.</h1>
+  <p class="hero__lead">One plan with every feature. Try it free for 14 days, pay with UPI AutoPay, and cancel any time.</p>
+{% endblock %}
+
+{% block body %}
+  <section class="section mk-section--tight">
+    <div class="container">
+      <div class="card pricing-card pricing-card--landing">
+        <span class="pricing-card__tag">14 days free</span>
+        <p class="pricing-card__name">{{ APP_NAME }} Pro</p>
+        {% include "partials/price.html" %}
+        <ul class="pricing-card__features">
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited automations</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Unlimited DMs and comment replies</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Comment to DM and follow to unlock</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}DM keywords, story replies and mentions</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Official Instagram API, no password</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Pay with UPI AutoPay, card or netbanking</li>
+          <li>{% include "partials/icon.html" with name="check" size=18 stroke="2.4" %}Cancel any time</li>
+        </ul>
+        <a href="{% url 'accounts:register' %}" class="btn btn--glow btn--block btn--large" data-auth-open="signup">Start 14-day free trial</a>
+        <p class="pricing-card__note">No charge for 14 days (₹5 verification, refunded). One free trial per Instagram account.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tinted">
+    <div class="container container--narrow">
+      <p class="eyebrow eyebrow--center">Compare</p>
+      <h2 class="section__title">Why people switch to {{ APP_NAME }}</h2>
+      {% include "marketing/partials/compare_table.html" %}
+      <p class="mk-more-links"><a href="{% url 'marketing:alternative' %}">Read the full comparison</a></p>
+    </div>
+  </section>
+{% endblock %}

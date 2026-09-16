@@ -1,0 +1,5 @@
+{% url 'marketing:pricing' as pricing_url %}
+<div class="hero__actions mk-hero__actions">
+  <a href="{% url 'accounts:register' %}" class="btn btn--large btn--glow" data-auth-open="signup">Start 14-day free trial</a>
+  <a href="{{ secondary_url|default:pricing_url }}" class="btn btn--large btn--ghost">{{ secondary_label|default:"See pricing" }}</a>
+</div>

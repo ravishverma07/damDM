@@ -1,0 +1,39 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>About</p>
+  <h1 class="hero__title mk-hero__title">Instagram automation that anyone can afford</h1>
+  <p class="hero__lead">{{ APP_NAME }} is built by {{ APP_VENDOR }} for creators and businesses in India who want to reply to every comment and message without hiring a team.</p>
+{% endblock %}
+
+{% block body %}
+  <section class="section mk-section--tight">
+    <div class="container container--narrow prose mk-prose">
+      <h2>Why we built {{ APP_NAME }}</h2>
+      <p>
+        Instagram is where many Indian creators, coaches and small businesses find their customers.
+        But the people who comment “price?” or “link please” expect an answer quickly, and replying to
+        each of them by hand takes hours. The tools that automate this were often priced in US dollars,
+        charged more as an audience grew, and took a long time to learn.
+      </p>
+      <p>
+        We wanted something simpler: connect Instagram, pick a template, and go live in a minute, for
+        one small monthly price with everything included.
+      </p>
+
+      <h2>What we believe</h2>
+      <ul class="mk-checklist">
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span><strong>Official and safe.</strong> We only use Meta's official Instagram API. We never ask for your password.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span><strong>Helpful, not spammy.</strong> Every automated message answers something a person asked for.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span><strong>Fair pricing.</strong> One plan at ₹{{ PLAN_PRICE }}/month, the same whether you have 500 followers or 5 lakh.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span><strong>Your data is yours.</strong> Read our <a href="{% url 'core:privacy' %}">privacy policy</a> to see what we store and how to delete it.</span></li>
+      </ul>
+
+      <h2>Talk to us</h2>
+      <p>
+        Questions, feedback or partnership ideas? Email
+        <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a> or visit our
+        <a href="{% url 'core:contact' %}">contact page</a>.
+      </p>
+    </div>
+  </section>
+{% endblock %}

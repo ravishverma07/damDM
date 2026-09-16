@@ -3,11 +3,157 @@
 {% block content %}
 <article class="prose">
   <h1>Terms of Service</h1>
-  <p class="text-sm muted">Placeholder — replace with reviewed legal copy before launch.</p>
+  <p class="text-sm muted">Last updated 17 September 2026</p>
+
   <p>
-    {{ APP_NAME }} is an independent product of {{ APP_VENDOR }}. It is not affiliated with,
-    endorsed by, or sponsored by Instagram or Meta. You are responsible for using the service
-    in line with Instagram's Platform Terms and community guidelines.
+    These terms are an agreement between you and {{ BUSINESS_LEGAL_NAME }} ("{{ APP_NAME }}", "we",
+    "us"){% if BUSINESS_ADDRESS %}, {{ BUSINESS_ADDRESS }}{% endif %}, for your use of
+    {{ APP_BASE_URL }} and the {{ APP_NAME }} service. By creating an account or using the service,
+    you accept these terms and our <a href="{% url 'core:privacy' %}">Privacy Policy</a>. If you use
+    {{ APP_NAME }} for a business, you accept them on its behalf.
+  </p>
+
+  <h2>1. The service</h2>
+  <p>
+    {{ APP_NAME }} lets you automate replies on your Instagram professional account: replies to
+    comments, direct messages (DMs) sent in response to comments, keywords, story replies and story
+    mentions, and related features. It works only through Meta's official Instagram API.
+  </p>
+
+  <h2>2. Who can use it</h2>
+  <ul>
+    <li>You must be at least 18 years old and able to enter a binding contract.</li>
+    <li>You need an Instagram Business or Creator account that you own or are authorised to manage.</li>
+    <li>You must give accurate information and keep your login details secure. You are responsible for
+      everything done through your account.</li>
+  </ul>
+
+  <h2>3. Instagram and Meta</h2>
+  <p>
+    {{ APP_NAME }} is an independent product. It is not affiliated with, endorsed by, or sponsored by
+    Instagram or Meta. You must follow Meta's Platform Terms, Instagram's Terms of Use and Community
+    Guidelines when using {{ APP_NAME }}. Meta controls what its API allows, for example how and when
+    messages can be sent, and may change it at any time. We are not responsible for actions Meta takes
+    on your Instagram account, or for features that stop working because Meta changes or limits its API.
+  </p>
+
+  <h2>4. Acceptable use</h2>
+  <p>You agree not to use {{ APP_NAME }} to:</p>
+  <ul>
+    <li>send spam, or messages to people who haven't interacted with your account;</li>
+    <li>share anything illegal, misleading, fraudulent, hateful, sexually explicit, or harmful to children;</li>
+    <li>promote scams, gambling, weapons, drugs or other goods and services restricted by law or by Meta;</li>
+    <li>infringe anyone's intellectual property or privacy;</li>
+    <li>collect people's data without a lawful basis, or use it for purposes they wouldn't expect;</li>
+    <li>interfere with, overload, reverse-engineer or gain unauthorised access to the service; or</li>
+    <li>resell or share access to the service without our written permission.</li>
+  </ul>
+  <p>We may pause automations or suspend accounts that break these rules.</p>
+
+  <h2>5. Your content</h2>
+  <p>
+    You own the messages, links and other content you add to {{ APP_NAME }}, and you are responsible for
+    it. You give us permission to store, process and send that content only as needed to run the service
+    for you. When {{ APP_NAME }} handles comments and messages from people who interact with your account,
+    it does so on your behalf and on your instructions.
+  </p>
+
+  <h2>6. Plans, free trial and payment</h2>
+  <ul>
+    <li><strong>Price.</strong> The Pro plan costs ₹{{ PLAN_PRICE }} per month, inclusive of applicable
+      taxes, unless a different price is shown when you subscribe.</li>
+    <li><strong>Free trial.</strong> Eligible new customers get a 14-day free trial, limited to one per
+      person, Instagram account, device and payment method. We may refuse or end a trial if we believe
+      these limits are being avoided.</li>
+    <li><strong>AutoPay.</strong> Payments are processed by Razorpay using UPI AutoPay, cards or
+      netbanking. By subscribing, you authorise a recurring monthly charge until you cancel. A small
+      verification amount (about ₹5) may be taken when you set up AutoPay; it is refunded automatically.</li>
+    <li><strong>Renewal.</strong> Your plan renews every month. If a payment fails, Razorpay may retry it,
+      and we may pause your automations until it succeeds.</li>
+    <li><strong>Price changes.</strong> We will tell you at least 30 days before a price change affects
+      you. You can cancel before it takes effect.</li>
+    <li><strong>Refunds.</strong> See our <a href="{% url 'core:refunds' %}">Refund &amp; Cancellation Policy</a>.</li>
+  </ul>
+
+  <h2>7. Cancelling and closing your account</h2>
+  <p>
+    You can cancel any time from <strong>Plan &amp; billing</strong>. You won't be charged again, and your
+    plan keeps working until the end of the trial or month you've paid for. You can close your account from
+    <strong>Settings</strong>. We may suspend or close accounts that break these terms, that Meta restricts,
+    or where we are required to by law. Where reasonable, we will tell you first.
+  </p>
+
+  <h2>8. Referral programme</h2>
+  <ul>
+    <li>When someone you invite with your referral link creates a new {{ APP_NAME }} account and makes their
+      first successful paid monthly payment, you earn 50% of that payment,
+      once per person.</li>
+    <li>Rewards are held for 7 days, and cancelled if the payment is refunded or reversed.</li>
+    <li>You can withdraw available rewards of ₹100 or more to your UPI ID. We check each request before
+      paying it and may ask for information to confirm it.</li>
+    <li>Referring yourself, or accounts that share your email, Google or Instagram account, device or
+      payment method, doesn't earn rewards. Rewards gained through fraud, spam or misleading promotion may
+      be cancelled, and the account suspended.</li>
+    <li>Rewards have no cash value outside this programme, can't be transferred, and may be subject to
+      applicable taxes. We may change or end the programme with notice; rewards already available will
+      still be paid.</li>
+  </ul>
+
+  <h2>9. Coupons</h2>
+  <p>
+    Coupons are personal, can only be used by the Instagram account they were issued to, and only before
+    they expire. They have no cash value. We may withdraw a coupon that was issued by mistake or misused.
+  </p>
+
+  <h2>10. Availability and changes</h2>
+  <p>
+    We work to keep {{ APP_NAME }} running smoothly, but we don't guarantee it will always be available or
+    error-free. Messages can be delayed or not sent, for example because of Instagram's limits, outages or
+    your account settings. We may add, change or remove features over time.
+  </p>
+
+  <h2>11. Our intellectual property</h2>
+  <p>
+    {{ APP_NAME }}, its software, design and brand belong to us. These terms give you a personal,
+    non-transferable right to use the service while your account is active; they don't transfer any
+    ownership to you.
+  </p>
+
+  <h2>12. Disclaimers and liability</h2>
+  <p>
+    The service is provided "as is" and "as available". To the extent the law allows, we don't promise any
+    particular results, such as more followers, reach or sales. We are not liable for indirect or
+    consequential losses, such as lost profits, lost data or harm to your Instagram account. Our total
+    liability for any claim relating to the service is limited to the amount you paid us in the 3 months
+    before the claim. Nothing in these terms limits rights you have under Indian consumer law that can't
+    be excluded.
+  </p>
+
+  <h2>13. Indemnity</h2>
+  <p>
+    You agree to cover our reasonable losses and costs if a third party makes a claim against us because of
+    your content or your breach of these terms or the law.
+  </p>
+
+  <h2>14. Changes to these terms</h2>
+  <p>
+    We may update these terms. If a change is significant, we will tell you by email or in the app before it
+    takes effect. Continuing to use {{ APP_NAME }} after that means you accept the updated terms.
+  </p>
+
+  <h2>15. Governing law and disputes</h2>
+  <p>
+    These terms are governed by the laws of India. Please contact us first so we can try to resolve any
+    problem. If we can't, the courts at Solan, Himachal Pradesh, have exclusive jurisdiction, subject to any
+    rights you have under the Consumer Protection Act, 2019.
+  </p>
+
+  <h2>16. Contact</h2>
+  <p>
+    {{ BUSINESS_LEGAL_NAME }}<br>
+    {% if BUSINESS_ADDRESS %}{{ BUSINESS_ADDRESS }}<br>{% endif %}
+    Email: <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>
+    {% if SUPPORT_PHONE %}<br>Phone: <a href="tel:{{ SUPPORT_PHONE|cut:' ' }}">{{ SUPPORT_PHONE }}</a>{% endif %}
   </p>
 </article>
 {% endblock %}

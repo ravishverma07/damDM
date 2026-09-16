@@ -85,6 +85,11 @@ class RazorpayBillingProvider(BillingProvider):
             raise BillingError("Test subscriptions can't be fetched.")
         return self.state_from_entity(self._request("GET", f"/subscriptions/{subscription_id}"))
 
+    def fetch_payment(self, payment_id):
+        if self.mock:
+            raise BillingError("Test payments can't be fetched.")
+        return self._request("GET", f"/payments/{payment_id}")
+
     def cancel_subscription(self, subscription_id, at_period_end=True):
         if self.mock:
             return SubscriptionState(

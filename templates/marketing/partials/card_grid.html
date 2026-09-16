@@ -1,0 +1,11 @@
+{# Linked cards: pass cards (Page objects) and card_url (a URL name taking slug). #}
+<div class="feature-grid">
+  {% for card in cards %}
+    <a class="feature-card feature-card--link" href="{% url card_url slug=card.slug %}">
+      <span class="feature-card__icon">{% include "partials/icon.html" with name=card.icon %}</span>
+      <h3>{{ card.name }}</h3>
+      <p>{{ card.summary }}</p>
+      <span class="feature-card__more">Learn more {% include "partials/icon.html" with name="chevron" size=16 %}</span>
+    </a>
+  {% endfor %}
+</div>

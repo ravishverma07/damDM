@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Contact Us · {{ APP_NAME }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1>Contact Us</h1>
+  <p>
+    Questions about your account, billing or a refund? Email or call us and we'll help you as soon as we can.
+  </p>
+
+  <h2>Support</h2>
+  <ul>
+    <li>Email: <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a></li>
+    {% if SUPPORT_PHONE %}<li>Phone: <a href="tel:{{ SUPPORT_PHONE|cut:' ' }}">{{ SUPPORT_PHONE }}</a></li>{% endif %}
+  </ul>
+
+  <h2>Business details</h2>
+  <ul>
+    <li>Legal name: {{ BUSINESS_LEGAL_NAME }}</li>
+    {% if BUSINESS_ADDRESS %}<li>Address: {{ BUSINESS_ADDRESS }}</li>{% endif %}
+    <li>Website: <a href="{{ APP_BASE_URL }}">{{ APP_BASE_URL }}</a></li>
+  </ul>
+
+  <p>
+    For billing, see our <a href="{% url 'core:refunds' %}">Refund &amp; Cancellation Policy</a>.
+    For privacy requests, see our <a href="{% url 'core:privacy' %}">Privacy Policy</a>.
+  </p>
+</article>
+{% endblock %}

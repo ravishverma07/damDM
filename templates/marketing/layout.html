@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% comment %}
+  Shared layout for marketing pages: breadcrumbs, hero, page body, call to action.
+{% endcomment %}
+{% block main %}
+<main class="landing mk">
+  <section class="mk-hero">
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="container">
+      {% include "marketing/partials/breadcrumbs.html" %}
+      <div class="mk-hero__copy">
+        {% block hero %}{% endblock %}
+      </div>
+    </div>
+  </section>
+
+  {% block body %}{% endblock %}
+
+  {% if faqs and not hide_faq_section %}
+    <section class="section" id="faq">
+      <div class="container container--narrow">
+        <p class="eyebrow eyebrow--center">FAQ</p>
+        <h2 class="section__title">{% block faq_title %}Common questions{% endblock %}</h2>
+        {% include "marketing/partials/faq_list.html" %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% block cta %}{% include "marketing/partials/cta.html" %}{% endblock %}
+</main>
+{% endblock %}

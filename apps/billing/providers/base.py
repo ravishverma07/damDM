@@ -72,6 +72,10 @@ class BillingProvider(abc.ABC):
         """Read authoritative subscription state from the provider."""
 
     @abc.abstractmethod
+    def fetch_payment(self, payment_id: str) -> dict:
+        """Read a payment (method, UPI ID or card) from the provider."""
+
+    @abc.abstractmethod
     def cancel_subscription(
         self, subscription_id: str, at_period_end: bool = True
     ) -> SubscriptionState:

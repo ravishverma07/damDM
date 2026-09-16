@@ -7,7 +7,13 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/icon-192.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% url 'core:manifest' %}">
+  {# Home-screen name; otherwise phones use the page title, e.g. "Dashboard · DamDM". #}
+  <meta name="application-name" content="{{ APP_NAME }}">
+  <meta name="apple-mobile-web-app-title" content="{{ APP_NAME }}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <script>
     (function () {
       var choice = "system";
@@ -16,8 +22,20 @@
         (choice !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.dataset.theme = dark ? "dark" : "light";
     })();
+    (function () {
+      // Report the browser's timezone so the server shows times in local time.
+      try {
+        var zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var saved = (document.cookie.match(/(?:^|; )damdm_tz=([^;]*)/) || [])[1];
+        if (zone && decodeURIComponent(saved || "") !== zone) {
+          document.cookie = "damdm_tz=" + encodeURIComponent(zone) +
+            "; path=/; max-age=31536000; samesite=lax" + (location.protocol === "https:" ? "; secure" : "");
+        }
+      } catch (e) {}
+    })();
   </script>
-  <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+  <title>{% block title %}{% if seo_title %}{{ seo_title }} · {{ APP_NAME }}{% else %}{{ APP_NAME }}{% endif %}{% endblock %}</title>
+  {% include "partials/seo_head.html" %}
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   {% block head %}{% endblock %}
@@ -59,6 +77,8 @@
   {% if user.is_authenticated %}
     {% include "partials/tabbar.html" %}
   {% endif %}
+
+  {% if google_one_tap %}{% include "accounts/partials/google_one_tap.html" %}{% endif %}
 
   {% if auth_panel and not hide_auth_dialog %}
     <dialog id="auth-dialog" class="auth-dialog" aria-label="Sign in to {{ APP_NAME }}"

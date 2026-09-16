@@ -36,6 +36,18 @@ APP_NAME = "DamDM"
 APP_VENDOR = "DammAI"
 APP_BASE_URL = env("APP_BASE_URL", default="http://localhost:8000").rstrip("/")
 
+# Shown on the Contact and Refund pages (payment providers require them).
+BUSINESS_LEGAL_NAME = env("BUSINESS_LEGAL_NAME", default=APP_VENDOR)
+SUPPORT_EMAIL = env("SUPPORT_EMAIL", default="support@dammai.in")
+PRIVACY_EMAIL = env("PRIVACY_EMAIL", default=SUPPORT_EMAIL)
+
+# Pro price shown on the site (the charged amount is the Razorpay plan). A list price
+# above it shows struck through with a "% off" tag; 0 hides the discount.
+PLAN_PRICE = 99
+PLAN_LIST_PRICE = env.int("PLAN_LIST_PRICE", default=199)
+SUPPORT_PHONE = env("SUPPORT_PHONE", default="")
+BUSINESS_ADDRESS = env("BUSINESS_ADDRESS", default="")
+
 # ---------------------------------------------------------------- apps
 
 DJANGO_APPS = [
@@ -46,6 +58,7 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
 ]
 
 THIRD_PARTY_APPS = [
@@ -64,6 +77,7 @@ LOCAL_APPS = [
     "apps.billing",
     "apps.referrals",
     "apps.coupons",
+    "apps.marketing",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -76,10 +90,14 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.core.middleware.BrowserTimezoneMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
 ]
+
+# Google sign-in (One Tap) needs popups it opens to reach this page.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -147,6 +165,9 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
+# Times are stored and calculated in UTC (TIME_ZONE) and shown in the visitor's
+# browser timezone; this is used until the browser has reported it.
+DEFAULT_DISPLAY_TIME_ZONE = env("DEFAULT_DISPLAY_TIME_ZONE", default="Asia/Kolkata")
 
 # ---------------------------------------------------------------- static
 
@@ -249,6 +270,8 @@ RAZORPAY_WEBHOOK_SECRET = env("RAZORPAY_WEBHOOK_SECRET", default="")
 RAZORPAY_PLAN_ID = env("RAZORPAY_PLAN_ID", default="")
 # When True, checkout skips Razorpay and approves the AutoPay mandate instantly.
 RAZORPAY_MOCK = env("RAZORPAY_MOCK")
+# Header and button colour of the Razorpay checkout popup.
+RAZORPAY_THEME_COLOR = env("RAZORPAY_THEME_COLOR", default="#1a1d23")
 # Key for hashing trial-abuse fingerprints (emails, Instagram ids, UPI ids).
 TRIAL_FINGERPRINT_KEY = env("TRIAL_FINGERPRINT_KEY", default="") or SECRET_KEY
 

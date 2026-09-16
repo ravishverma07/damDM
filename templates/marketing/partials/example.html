@@ -1,0 +1,23 @@
+{# A sample conversation for a feature or use case. #}
+<figure class="mk-chat" aria-label="Example conversation">
+  <div class="mk-chat__trigger">
+    <span class="mk-chat__label">{{ example.trigger_label }}</span>
+    <p class="mk-chat__bubble mk-chat__bubble--them">{{ example.trigger }}</p>
+  </div>
+  {% if example.public_reply %}
+    <div class="mk-chat__step">
+      <span class="mk-chat__label">Public reply</span>
+      <p class="mk-chat__bubble mk-chat__bubble--you">{{ example.public_reply }}</p>
+    </div>
+  {% endif %}
+  {% if example.dm %}
+    <div class="mk-chat__step">
+      <span class="mk-chat__label">DM from {{ APP_NAME }}</span>
+      <p class="mk-chat__bubble mk-chat__bubble--you">
+        {{ example.dm }}
+        {% if example.button %}<span class="mk-chat__button">{{ example.button }}</span>{% endif %}
+      </p>
+    </div>
+  {% endif %}
+  <figcaption class="mk-chat__caption">Example. You write your own words.</figcaption>
+</figure>

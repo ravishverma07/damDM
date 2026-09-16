@@ -1,0 +1,28 @@
+{% comment %}
+  Google One Tap: offers "Continue as …" to signed-out visitors who are signed in to
+  Google in this browser. Google shows it top right on desktop and at the bottom on phones.
+{% endcomment %}
+<form method="post" action="{% url 'accounts:google-one-tap' %}" data-one-tap-form hidden>
+  {% csrf_token %}
+  <input type="hidden" name="credential">
+  <input type="hidden" name="next" value="{{ google_one_tap.next }}">
+</form>
+<script>
+  window.damdmOneTap = function () {
+    var form = document.querySelector("[data-one-tap-form]");
+    google.accounts.id.initialize({
+      client_id: "{{ google_one_tap.client_id|escapejs }}",
+      nonce: "{{ google_one_tap.nonce|escapejs }}",
+      context: "signin",
+      itp_support: true,
+      use_fedcm_for_prompt: true,
+      cancel_on_tap_outside: false,
+      callback: function (response) {
+        form.elements.credential.value = response.credential;
+        form.submit();
+      },
+    });
+    google.accounts.id.prompt();
+  };
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="damdmOneTap()"></script>

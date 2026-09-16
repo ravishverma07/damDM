@@ -17,7 +17,7 @@ if META_MOCK or GOOGLE_MOCK or RAZORPAY_MOCK:  # noqa: F405
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
 CSRF_TRUSTED_ORIGINS = env.list(
-    "CSRF_TRUSTED_ORIGINS", default=["https://dm.dammai.in"]
+    "CSRF_TRUSTED_ORIGINS", default=[APP_BASE_URL]  # noqa: F405
 )
 
 # --- HTTPS / transport ---

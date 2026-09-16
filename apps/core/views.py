@@ -17,6 +17,28 @@ class LandingView(TemplateView):
             return redirect("core:dashboard")
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        from apps.marketing import seo
+        from apps.marketing.content import HOME_FAQS
+
+        context = super().get_context_data(**kwargs)
+        context.update(
+            seo_title="Auto-reply to Instagram comments and DMs",
+            seo_description=(
+                "Auto-DM everyone who comments on your Instagram posts and Reels, reply to DM "
+                "keywords and stories, and grow followers. Official API. 14 days free, then "
+                "₹99/month."
+            ),
+            home_faqs=HOME_FAQS,
+            structured_data=seo.to_json_ld(
+                seo.organization(),
+                seo.website(),
+                seo.software_application(),
+                seo.faq_page(HOME_FAQS),
+            ),
+        )
+        return context
+
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "core/dashboard.html"
@@ -54,6 +76,14 @@ class TermsView(TemplateView):
     template_name = "legal/terms.html"
 
 
+class RefundPolicyView(TemplateView):
+    template_name = "legal/refunds.html"
+
+
+class ContactView(TemplateView):
+    template_name = "legal/contact.html"
+
+
 class DataDeletionView(TemplateView):
     template_name = "legal/data_deletion.html"
 
@@ -66,6 +96,13 @@ class DataDeletionStatusView(DetailView):
     slug_field = "confirmation_code"
     slug_url_kwarg = "code"
     context_object_name = "deletion"
+
+
+class ManifestView(TemplateView):
+    """Web app manifest: the name and icon used when the site is added to a home screen."""
+
+    template_name = "manifest.webmanifest"
+    content_type = "application/manifest+json"
 
 
 def health(request):

@@ -11,6 +11,7 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("google/start/", views.GoogleStartView.as_view(), name="google-start"),
     path("google/callback/", views.GoogleCallbackView.as_view(), name="google-callback"),
+    path("google/one-tap/", views.GoogleOneTapView.as_view(), name="google-one-tap"),
     path("instagram/finish/", views.InstagramFinishView.as_view(), name="instagram-finish"),
     path(
         "password/reset/",

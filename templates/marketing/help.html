@@ -1,0 +1,59 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Help</p>
+  <h1 class="hero__title mk-hero__title">Getting started with {{ APP_NAME }}</h1>
+  <p class="hero__lead">Go from sign-up to your first live automation in a few minutes.</p>
+{% endblock %}
+
+{% block body %}
+  <section class="section mk-section--tight">
+    <div class="container container--narrow prose mk-prose">
+      <h2 id="before-you-start">Before you start</h2>
+      <ul class="mk-checklist">
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>An Instagram <strong>Business or Creator</strong> account. Not sure? See <a href="{% url 'marketing:guide' slug='switch-to-instagram-professional-account' %}">how to switch</a>.</span></li>
+        <li>{% include "partials/icon.html" with name="check" size=16 stroke="2.4" %}<span>In the Instagram app, go to Settings → Messages and story replies → Message controls → Connected tools, and turn on <strong>Allow access to messages</strong>.</span></li>
+      </ul>
+
+      <h2 id="connect">1. Create your account and connect Instagram</h2>
+      <p>
+        Sign up with email or Google, then choose <strong>Connect Instagram</strong>. You'll log in on
+        Instagram's own page and approve access. {{ APP_NAME }} never sees your password.
+      </p>
+
+      <h2 id="first-automation">2. Create your first automation</h2>
+      <p>Go to <strong>Automations → New</strong> and pick a template:</p>
+      <ul>
+        <li><a href="{% url 'marketing:feature' slug='comment-to-dm' %}">Send a link when people comment</a></li>
+        <li><a href="{% url 'marketing:feature' slug='follow-to-unlock' %}">Grow followers before sharing</a></li>
+        <li><a href="{% url 'marketing:feature' slug='dm-keyword-auto-reply' %}">Auto-reply to a DM keyword</a></li>
+        <li><a href="{% url 'marketing:feature' slug='story-reply-automation' %}">Reply when people answer your story</a></li>
+        <li><a href="{% url 'marketing:feature' slug='story-mention-automation' %}">Thank people who mention you</a></li>
+      </ul>
+      <p>Choose the posts, set your keywords, write your message and button, then turn it on.</p>
+
+      <h2 id="trial">3. Start your free trial</h2>
+      <p>
+        Automations run while you have an active trial or plan. Start the 14-day trial from
+        <strong>Plan &amp; billing</strong>; see <a href="{% url 'marketing:pricing' %}">pricing</a> for details.
+      </p>
+
+      <h2 id="test">4. Test it</h2>
+      <p>
+        Ask a friend to comment your keyword or send it by DM. Always test from a different Instagram
+        account, the way your followers will use it.
+      </p>
+
+      <h2 id="troubleshooting">Troubleshooting</h2>
+      <h3>Nothing happens when someone comments</h3>
+      <ul>
+        <li>Check the automation is <strong>on</strong> and your trial or plan is active.</li>
+        <li>Check the keyword matches what they typed, and the automation covers that post.</li>
+        <li>Make sure <strong>Allow access to messages</strong> is on in Instagram.</li>
+      </ul>
+      <h3>My Instagram account shows as disconnected</h3>
+      <p>Reconnect it from the Instagram page in {{ APP_NAME }}. This can happen after a password change or if access was removed in Instagram.</p>
+      <h3>Still stuck?</h3>
+      <p>Email <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a> with your Instagram username and what you tried. You can also read the <a href="{% url 'marketing:faq' %}">FAQ</a>.</p>
+    </div>
+  </section>
+{% endblock %}

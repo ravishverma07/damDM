@@ -11,7 +11,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.automations.models import Automation
-from apps.billing.models import BillingWebhookEvent, Payment, Subscription, TrialClaim
+from apps.billing.models import (
+    BillingWebhookEvent,
+    Payment,
+    Subscription,
+    TrialClaim,
+    TrialFingerprint,
+)
 from apps.billing.providers.base import BillingError, SubscriptionState
 from apps.billing.providers.razorpay_provider import RazorpayBillingProvider
 from apps.billing.services.trials import check_eligibility, normalize_email
@@ -258,6 +264,10 @@ def test_confirm_trusts_only_a_valid_signature(client, user, account, pro_plan, 
             provider="razorpay", customer_id="cust_1", subscription_id=sid, status="authenticated"
         ),
     )
+    monkeypatch.setattr(
+        RazorpayBillingProvider, "fetch_payment",
+        lambda self, pid: {"id": pid, "method": "upi", "upi": {"vpa": "me@okaxis"}},
+    )
     secret = b"test-razorpay-secret" if valid else b"forged"
     signature = hmac.new(secret, b"pay_9|sub_real_2", hashlib.sha256).hexdigest()
     client.force_login(user)
@@ -267,6 +277,10 @@ def test_confirm_trusts_only_a_valid_signature(client, user, account, pro_plan, 
     })
     subscription.refresh_from_db()
     assert (subscription.status == Status.TRIALING) is valid
+    assert (subscription.payment_method == "upi") is valid
+    if valid:
+        claim = TrialClaim.objects.get(subscription=subscription)
+        assert claim.fingerprints.filter(kind=TrialFingerprint.Kind.PAYMENT).exists()
 
 
 @override_settings(RAZORPAY_MOCK=False)
@@ -300,3 +314,23 @@ def test_razorpay_errors_show_their_description(user, pro_plan):
     provider = RazorpayBillingProvider(client=httpx.Client(transport=transport))
     with pytest.raises(BillingError, match="does not exist"):
         provider.fetch_subscription("sub_missing")
+
+
+@override_settings(RAZORPAY_MOCK=False)
+def test_trial_checkout_explains_the_refunded_verification_charge(
+    client, user, account, pro_plan, monkeypatch
+):
+    monkeypatch.setattr(RazorpayBillingProvider, "create_customer", lambda self, user: "cust_1")
+    monkeypatch.setattr(
+        RazorpayBillingProvider, "create_subscription",
+        lambda self, **kwargs: SubscriptionState(
+            provider="razorpay", customer_id="cust_1", subscription_id="sub_real_3",
+            status="created",
+        ),
+    )
+    client.force_login(user)
+    response = _start(client)
+    body = response.content.decode()
+    assert "₹5" in body and "refunded automatically" in body
+    assert response.context["razorpay_logo"].startswith("http://testserver/static/img/icon-512")
+    assert response.context["razorpay_theme_color"] == "#1a1d23"

@@ -93,8 +93,9 @@ def check_eligibility(request, user) -> Eligibility:
 def payment_fingerprint(payment: dict) -> str:
     """Hash of the UPI ID or saved card behind a Razorpay payment, if present."""
     method = str(payment.get("method") or "")
-    if method == "upi" and payment.get("vpa"):
-        value = str(payment["vpa"]).strip().lower()
+    vpa = payment.get("vpa") or (payment.get("upi") or {}).get("vpa")
+    if method == "upi" and vpa:
+        value = str(vpa).strip().lower()
     elif payment.get("card_id"):
         value = str(payment["card_id"])
     elif payment.get("token_id"):

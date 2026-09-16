@@ -1,15 +1,50 @@
 <footer class="site-footer">
-  <div class="container site-footer__inner">
-    <a href="{% url 'core:landing' %}" class="brand brand--small">
-      {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
-    </a>
-    <nav class="site-footer__links" aria-label="Legal">
-      <a href="{% url 'core:privacy' %}">Privacy</a>
-      <a href="{% url 'core:terms' %}">Terms</a>
-      <a href="{% url 'core:data-deletion' %}">Data deletion</a>
-    </nav>
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__about">
+        <a href="{% url 'core:landing' %}" class="brand brand--small">
+          {% include "partials/logo.html" %}<span class="brand__name">{{ APP_NAME }}</span>
+        </a>
+        <p>Auto-reply to Instagram comments, DMs and stories. ₹{{ PLAN_PRICE }}/month.</p>
+      </div>
+      <nav class="site-footer__col" aria-label="Product">
+        <p class="site-footer__heading">Product</p>
+        <a href="{% url 'marketing:features' %}">Features</a>
+        <a href="{% url 'marketing:pricing' %}">Pricing</a>
+        <a href="{% url 'marketing:alternative' %}">Compare</a>
+        <a href="{% url 'marketing:faq' %}">FAQ</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Features">
+        <p class="site-footer__heading">Features</p>
+        <a href="{% url 'marketing:feature' slug='comment-to-dm' %}">Comment to DM</a>
+        <a href="{% url 'marketing:feature' slug='follow-to-unlock' %}">Follow to unlock</a>
+        <a href="{% url 'marketing:feature' slug='dm-keyword-auto-reply' %}">DM keywords</a>
+        <a href="{% url 'marketing:feature' slug='story-reply-automation' %}">Story replies</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Use cases">
+        <p class="site-footer__heading">Use cases</p>
+        <a href="{% url 'marketing:use-case' slug='creators' %}">Creators</a>
+        <a href="{% url 'marketing:use-case' slug='coaches' %}">Coaches</a>
+        <a href="{% url 'marketing:use-case' slug='online-stores' %}">Online stores</a>
+        <a href="{% url 'marketing:use-case' slug='local-businesses' %}">Local businesses</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Resources">
+        <p class="site-footer__heading">Resources</p>
+        <a href="{% url 'marketing:guides' %}">Guides</a>
+        <a href="{% url 'marketing:help' %}">Help</a>
+        <a href="{% url 'marketing:about' %}">About</a>
+        <a href="{% url 'core:contact' %}">Contact</a>
+      </nav>
+      <nav class="site-footer__col" aria-label="Legal">
+        <p class="site-footer__heading">Legal</p>
+        <a href="{% url 'core:privacy' %}">Privacy</a>
+        <a href="{% url 'core:terms' %}">Terms</a>
+        <a href="{% url 'core:refunds' %}">Refunds &amp; cancellation</a>
+        <a href="{% url 'core:data-deletion' %}">Data deletion</a>
+      </nav>
+    </div>
     <p class="site-footer__legal">
-      &copy; {% now "Y" %} {{ APP_NAME }}. Not affiliated with, endorsed by, or sponsored by Instagram or Meta.
+      &copy; {% now "Y" %} {{ BUSINESS_LEGAL_NAME }}. Not affiliated with, endorsed by, or sponsored by Instagram or Meta.
     </p>
   </div>
 </footer>

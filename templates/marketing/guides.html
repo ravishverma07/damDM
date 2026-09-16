@@ -1,0 +1,23 @@
+{% extends "marketing/layout.html" %}
+{% block hero %}
+  <p class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Guides</p>
+  <h1 class="hero__title mk-hero__title">Instagram automation guides</h1>
+  <p class="hero__lead">Practical, step-by-step advice for getting more comments, followers and customers from Instagram.</p>
+{% endblock %}
+
+{% block body %}
+  <section class="section mk-section--tight">
+    <div class="container">
+      <div class="guide-grid">
+        {% for item in guides %}
+          <a class="guide-card" href="{% url 'marketing:guide' slug=item.slug %}">
+            <span class="guide-card__meta">{{ item.read_minutes }} min read</span>
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.summary }}</p>
+            <span class="feature-card__more">Read guide {% include "partials/icon.html" with name="chevron" size=16 %}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

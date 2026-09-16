@@ -1,0 +1,9 @@
+<section class="section">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>{{ cta_title|default:"Start automating your Instagram DMs" }}</h2>
+      <p>Try every feature free for 14 days, then just ₹{{ PLAN_PRICE }}/month. Cancel any time.</p>
+      <a href="{% url 'accounts:register' %}" class="btn btn--large btn--light" data-auth-open="signup">Start free trial</a>
+    </div>
+  </div>
+</section>
