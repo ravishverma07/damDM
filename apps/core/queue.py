@@ -20,3 +20,13 @@ def enqueue(task, *args, **kwargs) -> bool:
         logger.exception("Could not enqueue %s", task.name)
         return False
     return True
+
+
+def enqueue_later(task, countdown: int, *args, **kwargs) -> bool:
+    """``enqueue`` for work that should run after ``countdown`` seconds."""
+    try:
+        task.apply_async(args=args, kwargs=kwargs, countdown=countdown)
+    except OperationalError:
+        logger.exception("Could not schedule %s", task.name)
+        return False
+    return True

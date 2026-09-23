@@ -28,6 +28,9 @@ STORAGES["staticfiles"]["BACKEND"] = (  # noqa: F405
 # Nothing is collected during tests, so WhiteNoise has nothing to serve.
 MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]  # noqa: F405
 
+# Push is off unless a test turns it on, whatever the developer's .env holds.
+VAPID_PRIVATE_KEY = ""
+
 # Never hit Meta, Google or Razorpay from a test.
 META_MOCK = True
 META_APP_ID = "test-app-id"

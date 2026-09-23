@@ -1,3 +1,4 @@
+import dataclasses
 from urllib.parse import parse_qs, urlsplit
 
 import httpx
@@ -160,3 +161,37 @@ def test_exchange_code_raises_on_a_rejected_code():
     transport = httpx.MockTransport(lambda request: httpx.Response(400, json={"error": "bad"}))
     with httpx.Client(transport=transport) as http, pytest.raises(GoogleOAuthError):
         google.exchange_code("bad", client=http)
+
+
+def _with_photo(picture: str) -> GoogleIdentity:
+    return dataclasses.replace(google.MOCK_IDENTITY, picture=picture)
+
+
+def test_google_photo_is_saved_and_shown(client, monkeypatch):
+    photo = "https://lh3.googleusercontent.com/a/photo-1=s96-c"
+    monkeypatch.setattr(google, "MOCK_IDENTITY", _with_photo(photo))
+    _callback(client, _start(client))
+    user = User.objects.get(email=google.MOCK_IDENTITY.email)
+    assert user.avatar_url == photo
+    body = client.get(reverse("accounts:profile")).content.decode()
+    assert f'class="avatar__img" src="{photo}"' in body
+
+    # A new photo on Google replaces the old one at the next sign-in.
+    newer = "https://lh3.googleusercontent.com/a/photo-2=s96-c"
+    monkeypatch.setattr(google, "MOCK_IDENTITY", _with_photo(newer))
+    client.logout()
+    _callback(client, _start(client))
+    user.refresh_from_db()
+    assert user.avatar_url == newer
+
+
+def test_non_https_photos_are_ignored(client, monkeypatch):
+    monkeypatch.setattr(google, "MOCK_IDENTITY", _with_photo("javascript:alert(1)"))
+    _callback(client, _start(client))
+    assert User.objects.get(email=google.MOCK_IDENTITY.email).avatar_url == ""
+
+
+def test_users_without_a_photo_see_their_initial(client, user):
+    client.force_login(user)
+    body = client.get(reverse("accounts:profile")).content.decode()
+    assert "avatar__img" not in body

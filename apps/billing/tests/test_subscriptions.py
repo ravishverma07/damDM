@@ -316,8 +316,8 @@ def test_razorpay_errors_show_their_description(user, pro_plan):
         provider.fetch_subscription("sub_missing")
 
 
-@override_settings(RAZORPAY_MOCK=False)
-def test_trial_checkout_explains_the_refunded_verification_charge(
+@override_settings(RAZORPAY_MOCK=False, TRIAL_UPFRONT_AMOUNT=100)
+def test_trial_checkout_explains_the_activation_charge(
     client, user, account, pro_plan, monkeypatch
 ):
     monkeypatch.setattr(RazorpayBillingProvider, "create_customer", lambda self, user: "cust_1")
@@ -331,6 +331,95 @@ def test_trial_checkout_explains_the_refunded_verification_charge(
     client.force_login(user)
     response = _start(client)
     body = response.content.decode()
-    assert "₹5" in body and "refunded automatically" in body
+    assert "₹1 today" in body and "Pay ₹1 and start" in body
     assert response.context["razorpay_logo"].startswith("http://testserver/static/img/icon-512")
     assert response.context["razorpay_theme_color"] == "#1a1d23"
+
+
+# --- the activation charge that starts a trial ---------------------------------
+
+@override_settings(RAZORPAY_MOCK=False, TRIAL_UPFRONT_AMOUNT=100)
+def test_a_trial_subscription_carries_the_activation_charge(user, pro_plan):
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"id": "sub_1", "status": "created"})
+
+    provider = RazorpayBillingProvider(client=httpx.Client(transport=httpx.MockTransport(handler)))
+    provider.create_subscription(
+        user=user, plan=pro_plan, customer_id="cust_1",
+        start_at=timezone.now() + timedelta(days=14),
+    )
+    addon = seen["body"]["addons"][0]["item"]
+    assert addon["amount"] == 100 and addon["currency"] == "INR"
+
+
+@override_settings(RAZORPAY_MOCK=False, TRIAL_UPFRONT_AMOUNT=0)
+def test_no_activation_charge_when_it_is_switched_off(user, pro_plan):
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"id": "sub_1", "status": "created"})
+
+    provider = RazorpayBillingProvider(client=httpx.Client(transport=httpx.MockTransport(handler)))
+    provider.create_subscription(
+        user=user, plan=pro_plan, customer_id="cust_1",
+        start_at=timezone.now() + timedelta(days=14),
+    )
+    assert "addons" not in seen["body"]
+
+
+@override_settings(RAZORPAY_MOCK=False, TRIAL_UPFRONT_AMOUNT=100)
+def test_paying_now_has_no_activation_charge(user, pro_plan):
+    seen = {}
+
+    def handler(request):
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"id": "sub_1", "status": "created"})
+
+    provider = RazorpayBillingProvider(client=httpx.Client(transport=httpx.MockTransport(handler)))
+    provider.create_subscription(user=user, plan=pro_plan, customer_id="cust_1", start_at=None)
+    assert "addons" not in seen["body"]
+
+
+@override_settings(RAZORPAY_MOCK=False, TRIAL_UPFRONT_AMOUNT=100)
+def test_the_activation_charge_is_recorded_but_earns_no_referral_reward(
+    client, user, account, pro_plan, monkeypatch
+):
+    subscription = Subscription.objects.create(
+        user=user, plan=pro_plan, provider_subscription_id="sub_up", status=Status.INCOMPLETE,
+        trial_ends_at=timezone.now() + timedelta(days=14), trial_signals=[["email", "a" * 64]],
+    )
+    monkeypatch.setattr(
+        RazorpayBillingProvider, "fetch_subscription",
+        lambda self, sid: SubscriptionState(
+            provider="razorpay", customer_id="c", subscription_id=sid, status="authenticated"
+        ),
+    )
+    monkeypatch.setattr(
+        RazorpayBillingProvider, "fetch_payment",
+        lambda self, pid: {
+            "id": pid, "amount": 100, "currency": "INR", "status": "captured",
+            "method": "upi", "upi": {"vpa": "me@okaxis"}, "created_at": 1789000000,
+        },
+    )
+    rewards = []
+    monkeypatch.setattr(
+        "apps.billing.services.subscriptions.reward_for_payment",
+        lambda payment: rewards.append(payment),
+    )
+    signature = hmac.new(
+        b"test-razorpay-secret", b"pay_up|sub_up", hashlib.sha256
+    ).hexdigest()
+    client.force_login(user)
+    client.post(reverse("billing:confirm"), {
+        "razorpay_payment_id": "pay_up", "razorpay_subscription_id": "sub_up",
+        "razorpay_signature": signature,
+    })
+
+    payment = Payment.objects.get()
+    assert payment.amount == 100 and payment.status == Payment.Status.CAPTURED
+    assert payment.subscription == subscription
+    assert rewards == [], "the activation charge is not a monthly payment"

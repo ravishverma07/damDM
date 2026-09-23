@@ -15,7 +15,9 @@ urlpatterns = [
         views.AccountDisconnectView.as_view(),
         name="account-disconnect",
     ),
-    # Registered in the Meta app dashboard; Meta POSTs a signed_request to each.
+    # Registered in the Meta app dashboard.
+    path("webhooks/", views.WebhookView.as_view(), name="webhooks"),
+    # Meta POSTs a signed_request to each of these.
     path("deauthorize/", views.DeauthorizeCallbackView.as_view(), name="deauthorize"),
     path("data-deletion/", views.DataDeletionCallbackView.as_view(), name="data-deletion"),
 ]

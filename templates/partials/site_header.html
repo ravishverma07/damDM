@@ -13,6 +13,7 @@
         <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>
         <span class="theme-toggle__sun">{% include "partials/icon.html" with name="sun" size=20 %}</span>
       </button>
+      <button type="button" class="site-nav__link site-nav__install" data-install-app hidden>Install app</button>
       <a href="{% url 'accounts:login' %}" class="site-nav__link" data-auth-open="signin">Log in</a>
       <a href="{% url 'accounts:register' %}" class="btn btn--primary btn--small" data-auth-open="signup">Get started</a>
     </nav>

@@ -8,7 +8,7 @@
       <span class="theme-toggle__moon">{% include "partials/icon.html" with name="moon" size=20 %}</span>
       <span class="theme-toggle__sun">{% include "partials/icon.html" with name="sun" size=20 %}</span>
     </button>
-    <a href="{% url 'accounts:profile' %}" class="avatar" aria-label="Settings">{{ user.get_short_name|first|upper }}</a>
+    <a href="{% url 'accounts:profile' %}" class="avatar" aria-label="Settings">{% include "partials/avatar_content.html" with person=user %}</a>
   </div>
 </header>
 
@@ -34,7 +34,7 @@
 
   <div class="sidebar__foot">
     <a href="{% url 'accounts:profile' %}" class="sidebar__user">
-      <span class="avatar">{{ user.get_short_name|first|upper }}</span>
+      <span class="avatar">{% include "partials/avatar_content.html" with person=user %}</span>
       <span class="sidebar__user-text"><strong>{{ user.get_short_name }}</strong><span>{{ user.email }}</span></span>
     </a>
     <button type="button" class="sidebar__link theme-toggle" data-theme-toggle>

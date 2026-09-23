@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+{# Saved on the device by the service worker, so it holds nothing personal. #}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
+  <title>You're offline · {{ APP_NAME }}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script>
+    try {
+      var c = localStorage.getItem("theme") || "system";
+      var d = c === "dark" || (c !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = d ? "dark" : "light";
+    } catch (e) {}
+  </script>
+</head>
+<body class="layout-site">
+  <main class="container page offline-page">
+    <div class="card card--narrow offline-card">
+      <img src="{% static 'img/icon-192.png' %}" alt="" width="64" height="64" class="offline-card__logo">
+      <h1>You're offline</h1>
+      <p class="muted">Check your internet connection. Your automations keep running on our servers in the meantime.</p>
+      <button type="button" class="btn btn--primary btn--block" onclick="location.reload()">Try again</button>
+    </div>
+  </main>
+</body>
+</html>

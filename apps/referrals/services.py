@@ -19,13 +19,15 @@ import secrets
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
-from django.db.models import Sum
+from django.db.models import Max, Sum
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.billing.models import Payment, TrialFingerprint
 from apps.billing.services.trials import fingerprint, identity_signals
+from apps.core import notices
 
 from .models import Payout, Referral, ReferralCode, ReferralReward
 
@@ -168,6 +170,7 @@ def reward_for_payment(payment: Payment) -> ReferralReward | None:
     )
     referral.status = Referral.Status.REWARDED
     referral.save(update_fields=["status", "updated_at"])
+    notices.reward_earned(reward)
     return reward
 
 
@@ -179,7 +182,15 @@ def release_matured_rewards() -> int:
     matured.filter(payment__status=Payment.Status.REFUNDED).update(
         status=ReferralReward.Status.CANCELLED, updated_at=timezone.now()
     )
-    return matured.update(status=ReferralReward.Status.AVAILABLE, updated_at=timezone.now())
+    batches = list(
+        matured.values("referrer").annotate(total=Sum("amount"), last=Max("pk"))
+    )
+    released = matured.update(status=ReferralReward.Status.AVAILABLE, updated_at=timezone.now())
+    users = get_user_model().objects.in_bulk([row["referrer"] for row in batches])
+    for row in batches:
+        batch_key = f"{row['referrer']}-{row['last']}"
+        notices.rewards_available(users[row["referrer"]], row["total"], batch_key)
+    return released
 
 
 # --- wallet and payouts ----------------------------------------------------
@@ -246,6 +257,7 @@ def mark_payout_paid(payout: Payout, *, reference: str) -> Payout:
     payout.processed_at = timezone.now()
     payout.save(update_fields=["status", "reference", "processed_at", "updated_at"])
     payout.rewards.update(status=ReferralReward.Status.PAID, updated_at=timezone.now())
+    notices.payout_paid(payout)
     return payout
 
 
@@ -261,6 +273,7 @@ def reject_payout(payout: Payout, *, note: str) -> Payout:
     payout.rewards.update(
         status=ReferralReward.Status.AVAILABLE, payout=None, updated_at=timezone.now()
     )
+    notices.payout_rejected(payout)
     return payout
 
 

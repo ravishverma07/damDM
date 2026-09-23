@@ -6,19 +6,23 @@
   <h1>{% if trial %}Start your free trial{% else %}Subscribe to {{ APP_NAME }} Pro{% endif %}</h1>
   <p class="muted">
     {% if subscription.trial_ends_at %}
-      Approve UPI AutoPay for {% if PLAN_DISCOUNT_PERCENT %}<s>₹{{ PLAN_LIST_PRICE }}</s> {% endif %}₹99/month. Your first ₹99 payment is on
+      Approve UPI AutoPay for {% if PLAN_DISCOUNT_PERCENT %}<s>₹{{ PLAN_LIST_PRICE }}</s> {% endif %}₹{{ PLAN_PRICE }}/month.
+      Your first ₹{{ PLAN_PRICE }} payment is on
       <strong>{{ subscription.trial_ends_at|date:"j M Y" }}</strong>. Cancel any time before then.
     {% else %}
       Approve UPI AutoPay for {% if PLAN_DISCOUNT_PERCENT %}<s>₹{{ PLAN_LIST_PRICE }}</s> {% endif %}₹99/month. Your first payment is taken now.
     {% endif %}
   </p>
-  {% if subscription.trial_ends_at %}
+  {% if subscription.trial_ends_at and TRIAL_UPFRONT_DISPLAY %}
     <p class="checkout__note" role="note">
-      To verify your UPI ID or card, {{ APP_NAME }} charges <strong>₹5</strong> today. It is
-      <strong>refunded automatically</strong>, usually within 5–7 working days.
+      <strong>₹{{ TRIAL_UPFRONT_DISPLAY }} today</strong> to activate your AutoPay, then
+      ₹{{ PLAN_PRICE }} on {{ subscription.trial_ends_at|date:"j M Y" }}. Cancel before then and
+      that ₹{{ PLAN_PRICE }} is never charged.
     </p>
   {% endif %}
-  <button type="button" class="btn btn--primary btn--block btn--large" data-open-checkout>Continue to payment</button>
+  <button type="button" class="btn btn--primary btn--block btn--large" data-open-checkout>
+    {% if subscription.trial_ends_at and TRIAL_UPFRONT_DISPLAY %}Pay ₹{{ TRIAL_UPFRONT_DISPLAY }} and start{% else %}Continue to payment{% endif %}
+  </button>
   <a href="{% url 'billing:overview' %}" class="btn btn--block checkout__back">Back</a>
 
   <form method="post" action="{{ confirm_url }}" data-confirm-form hidden>

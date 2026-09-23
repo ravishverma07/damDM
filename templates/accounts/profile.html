@@ -11,7 +11,7 @@
 
   <section class="card settings-card">
     <div class="settings-profile">
-      <span class="avatar avatar--large">{{ user.get_short_name|first|upper }}</span>
+      <span class="avatar avatar--large">{% include "partials/avatar_content.html" with person=user %}</span>
       <div>
         <p class="settings-profile__name">{{ user.get_full_name }}</p>
         <p class="muted text-sm">{{ user.email }}</p>
@@ -32,6 +32,33 @@
       <label><input type="radio" name="theme" value="light" data-theme-choice><span>Light</span></label>
       <label><input type="radio" name="theme" value="dark" data-theme-choice><span>Dark</span></label>
     </div>
+  </section>
+
+  <section class="card settings-card">
+    <div class="settings-row settings-row--static">
+      {% include "partials/icon.html" with name="bell" size=20 %}<span>App &amp; notifications</span>
+    </div>
+    <div class="switch-row pwa-row" data-install-block hidden>
+      <span>
+        <span class="switch-row__title">Install the {{ APP_NAME }} app</span>
+        <span class="switch-row__hint">Opens full screen from your home screen.</span>
+      </span>
+      <button type="button" class="btn btn--small btn--primary" data-install-app hidden>Install</button>
+    </div>
+    <p class="pwa-tip" data-ios-install-tip hidden>
+      <strong>Install on iPhone:</strong> tap <strong>Share</strong> in Safari, then
+      <strong>Add to Home Screen</strong>. Open {{ APP_NAME }} from there to turn on notifications.
+    </p>
+    {% if VAPID_PUBLIC_KEY %}
+      <label class="switch-row pwa-row">
+        <span>
+          <span class="switch-row__title">Push notifications</span>
+          <span class="switch-row__hint" data-push-status>Checking this device…</span>
+        </span>
+        <span class="switch"><input type="checkbox" data-push-toggle disabled aria-label="Push notifications on this device"></span>
+      </label>
+      <button type="button" class="btn btn--small" data-push-test hidden>Send a test notification</button>
+    {% endif %}
   </section>
 
   <section class="card settings-list">

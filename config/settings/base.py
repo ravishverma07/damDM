@@ -41,6 +41,10 @@ BUSINESS_LEGAL_NAME = env("BUSINESS_LEGAL_NAME", default=APP_VENDOR)
 SUPPORT_EMAIL = env("SUPPORT_EMAIL", default="support@dammai.in")
 PRIVACY_EMAIL = env("PRIVACY_EMAIL", default=SUPPORT_EMAIL)
 
+# Web Push (VAPID). Generate with `manage.py generate_vapid_key`; empty turns push off.
+VAPID_PRIVATE_KEY = env("VAPID_PRIVATE_KEY", default="")
+VAPID_SUBJECT = env("VAPID_SUBJECT", default=f"mailto:{SUPPORT_EMAIL}")
+
 # Pro price shown on the site (the charged amount is the Razorpay plan). A list price
 # above it shows struck through with a "% off" tag; 0 hides the discount.
 PLAN_PRICE = 99
@@ -211,6 +215,18 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.instagram.tasks.sync_stale_accounts",
         "schedule": crontab(minute=40),
     },
+    "automations-expire-waiting-runs": {
+        "task": "apps.automations.tasks.expire_waiting_runs",
+        "schedule": crontab(minute=25),
+    },
+    "instagram-subscribe-pending-accounts": {
+        "task": "apps.instagram.tasks.subscribe_pending_accounts",
+        "schedule": crontab(minute=15, hour="*/3"),
+    },
+    "instagram-process-pending-webhooks": {
+        "task": "apps.instagram.tasks.process_pending_webhooks",
+        "schedule": crontab(minute="*/5"),
+    },
     "instagram-process-pending-data-deletions": {
         "task": "apps.instagram.tasks.process_pending_data_deletions",
         "schedule": crontab(minute=20),
@@ -218,6 +234,10 @@ CELERY_BEAT_SCHEDULE = {
     "billing-release-referral-rewards": {
         "task": "apps.referrals.tasks.release_referral_rewards",
         "schedule": crontab(minute=35),
+    },
+    "billing-remind-trial-ending": {
+        "task": "apps.billing.tasks.remind_trial_ending",
+        "schedule": crontab(minute=50),
     },
     "billing-sync-subscriptions": {
         "task": "apps.billing.tasks.sync_subscriptions",
@@ -268,6 +288,10 @@ RAZORPAY_KEY_SECRET = env("RAZORPAY_KEY_SECRET", default="")
 RAZORPAY_WEBHOOK_SECRET = env("RAZORPAY_WEBHOOK_SECRET", default="")
 # The ₹99 monthly plan created in the Razorpay dashboard (plan_...).
 RAZORPAY_PLAN_ID = env("RAZORPAY_PLAN_ID", default="")
+# Charged when the AutoPay mandate is approved for a trial, in paise. It replaces
+# Razorpay's own refundable verification charge; 0 leaves the trial completely free.
+TRIAL_UPFRONT_AMOUNT = env.int("TRIAL_UPFRONT_AMOUNT", default=100)
+
 # When True, checkout skips Razorpay and approves the AutoPay mandate instantly.
 RAZORPAY_MOCK = env("RAZORPAY_MOCK")
 # Header and button colour of the Razorpay checkout popup.

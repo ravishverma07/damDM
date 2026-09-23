@@ -19,6 +19,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.automations.models import Automation
+from apps.core import notices
 from apps.core.utils import client_ip, hash_ip
 from apps.referrals.services import reward_for_payment
 
@@ -168,7 +169,10 @@ def confirm_checkout(
     except BillingError:
         logger.exception("Could not fetch mandate payment %s", payment_id)
         payment = None
-    return apply_state(subscription, state, payment=payment)
+    subscription = apply_state(subscription, state, payment=payment)
+    if payment and str(payment.get("status")) == "captured" and int(payment.get("amount") or 0):
+        record_payment(subscription, payment, Payment.Status.CAPTURED, reward=False)
+    return subscription
 
 
 def cancel_subscription(user) -> Subscription:
@@ -219,6 +223,7 @@ def apply_provider_status(
     payment: dict | None = None,
 ) -> Subscription:
     """Move a subscription to the provider's reported state and follow the consequences."""
+    previous = subscription.status
     subscription.status = _local_status(subscription, provider_status)
     if period_start:
         subscription.current_period_start = period_start
@@ -236,8 +241,18 @@ def apply_provider_status(
     if subscription.trial_signals:
         _update_trial(subscription, payment)
     # Judged across all the user's subscriptions, so an old one ending can't pause a new one.
-    if not has_access(subscription.user):
-        pause_automations(subscription.user)
+    user_has_access = has_access(subscription.user)
+    paused = 0 if user_has_access else pause_automations(subscription.user)
+
+    if subscription.status != previous:
+        if subscription.status == Status.PAST_DUE:
+            notices.payment_failed(subscription)
+        elif (
+            subscription.status in (Status.CANCELED, Status.EXPIRED)
+            and previous in LIVE_STATUSES
+            and not user_has_access
+        ):
+            notices.plan_ended(subscription, paused)
     return subscription
 
 
@@ -262,7 +277,9 @@ def handle_webhook(event: WebhookEventData) -> str:
     return "processed"
 
 
-def record_payment(subscription: Subscription, payment: dict, status: str) -> Payment:
+def record_payment(
+    subscription: Subscription, payment: dict, status: str, *, reward: bool = True
+) -> Payment:
     record, created = Payment.objects.update_or_create(
         provider=subscription.provider,
         provider_payment_id=str(payment["id"]),
@@ -278,7 +295,12 @@ def record_payment(subscription: Subscription, payment: dict, status: str) -> Pa
         },
     )
     if created and status == Payment.Status.CAPTURED:
-        reward_for_payment(record)
+        if record.amount > 0:
+            notices.payment_received(record)
+        if reward:
+            # The mandate's activation charge is not a monthly payment, so it
+            # never earns the referrer their share.
+            reward_for_payment(record)
     return record
 
 

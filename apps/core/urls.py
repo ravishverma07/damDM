@@ -23,5 +23,14 @@ urlpatterns = [
         name="data-deletion-status",
     ),
     path("manifest.webmanifest", views.ManifestView.as_view(), name="manifest"),
+    path("sw.js", views.ServiceWorkerView.as_view(), name="service-worker"),
+    path("offline/", views.OfflineView.as_view(), name="offline"),
+    path("notifications/push/subscribe/", views.PushSubscribeView.as_view(), name="push-subscribe"),
+    path(
+        "notifications/push/unsubscribe/",
+        views.PushUnsubscribeView.as_view(),
+        name="push-unsubscribe",
+    ),
+    path("notifications/push/test/", views.PushTestView.as_view(), name="push-test"),
     path("healthz/", views.health, name="health"),
 ]

@@ -101,11 +101,13 @@ def connect_account(user: User, identity: InstagramIdentity) -> ConnectedAccount
 
     notify_matching_coupons(account)
 
+    from apps.core.queue import enqueue
+
+    from ..tasks import subscribe_account_task, sync_account_task
+
+    # Instagram only sends webhooks for accounts that have subscribed themselves.
+    transaction.on_commit(lambda: enqueue(subscribe_account_task, account.pk))
     if newly_connected:
-        from apps.core.queue import enqueue
-
-        from ..tasks import sync_account_task
-
         transaction.on_commit(lambda: enqueue(sync_account_task, account.pk))
     return account
 

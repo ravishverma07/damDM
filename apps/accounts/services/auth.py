@@ -183,6 +183,7 @@ def user_for_google(identity) -> tuple[User, bool]:
 
     if not user.is_active:
         raise SocialAuthError("This account has been disabled.")
+    _refresh_profile_from_google(user, identity)
     link_social_login(
         user,
         provider=SocialLogin.Provider.GOOGLE,
@@ -191,6 +192,20 @@ def user_for_google(identity) -> tuple[User, bool]:
         extra={"name": identity.name, "picture": identity.picture},
     )
     return user, password_disabled
+
+
+def _refresh_profile_from_google(user: User, identity) -> None:
+    """Keep the Google photo current, and fill in a missing name."""
+    changed = []
+    picture = identity.picture if identity.picture.startswith("https://") else ""
+    if picture and len(picture) <= 1000 and user.avatar_url != picture:
+        user.avatar_url = picture
+        changed.append("avatar_url")
+    if identity.name and not user.full_name:
+        user.full_name = identity.name[:150]
+        changed.append("full_name")
+    if changed:
+        user.save(update_fields=[*changed, "updated_at"])
 
 
 @transaction.atomic

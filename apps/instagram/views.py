@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -5,7 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.db.models import Count
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -30,7 +36,7 @@ from apps.core.queue import enqueue
 from apps.core.services import audit
 
 from .models import ConnectedAccount, Platform
-from .services import oauth
+from .services import oauth, webhooks
 from .services.connect import AccountAlreadyClaimed, connect_account, stash_pending
 from .services.lifecycle import (
     InvalidSignedRequest,
@@ -38,7 +44,7 @@ from .services.lifecycle import (
     disconnect_account,
     parse_signed_request,
 )
-from .tasks import process_data_deletion, sync_account_task
+from .tasks import process_data_deletion, process_webhook_event, sync_account_task
 
 SYNC_THROTTLE_SECONDS = 60
 
@@ -88,6 +94,15 @@ class InstagramCallbackView(View):
             state = finish_oauth(request, SocialLogin.Provider.INSTAGRAM)
             identity = oauth.exchange_code(request.GET.get("code", ""))
         except (SocialAuthError, oauth.InstagramOAuthError) as exc:
+            # Keep Instagram's own reason where support can read it later.
+            audit(
+                AuditLog.Action.WEBHOOK_REJECTED,
+                actor=request.user if request.user.is_authenticated else None,
+                target_type="instagram_signin",
+                request=request,
+                reason=str(exc),
+                detail=getattr(exc, "detail", "")[:400],
+            )
             messages.error(request, str(exc))
             return redirect(failure_url)
 
@@ -200,6 +215,55 @@ def _verified_payload(request, callback: str) -> dict | None:
             request=request,
         )
         return None
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class WebhookView(View):
+    """
+    Instagram webhooks: comments, DMs, story replies and mentions.
+
+    GET answers Meta's one-time subscription check. POST verifies the
+    signature, stores each event and returns 200 straight away; the work
+    happens in Celery, because Meta retries anything slow or failed.
+    """
+
+    http_method_names = ["get", "post"]
+
+    def get(self, request):
+        challenge = webhooks.verify_subscription(request.GET)
+        if challenge is None:
+            audit(
+                AuditLog.Action.WEBHOOK_REJECTED,
+                target_type="instagram_webhook",
+                target_id="verify",
+                request=request,
+                **webhooks.token_report(request.GET),
+            )
+            return HttpResponseForbidden()
+        return HttpResponse(challenge, content_type="text/plain")
+
+    def post(self, request):
+        signature = request.headers.get("X-Hub-Signature-256", "")
+        try:
+            webhooks.verify_signature(request.body, signature)
+        except webhooks.InvalidSignature:
+            audit(
+                AuditLog.Action.WEBHOOK_REJECTED,
+                target_type="instagram_webhook",
+                request=request,
+                **webhooks.signature_report(request.body, signature),
+            )
+            return HttpResponseForbidden()
+        try:
+            payload = json.loads(request.body or b"{}")
+        except ValueError:
+            return HttpResponseBadRequest()
+        if not isinstance(payload, dict):
+            return HttpResponseBadRequest()
+
+        for event in webhooks.store(payload):
+            enqueue(process_webhook_event, event.pk)
+        return HttpResponse(status=200)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

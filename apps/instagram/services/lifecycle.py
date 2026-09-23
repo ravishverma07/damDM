@@ -16,6 +16,7 @@ from django.utils import timezone
 
 from apps.accounts.models import SocialLogin
 from apps.automations.models import Automation
+from apps.core import notices
 from apps.core.models import AuditLog, DataDeletionRequest
 from apps.core.services import audit
 from apps.messaging.models import Comment, Contact, Message
@@ -75,6 +76,8 @@ def disconnect_account(
         reason=reason,
         automations_paused=paused,
     )
+    if reason != "user":
+        notices.instagram_needs_attention(account)
     return paused
 
 

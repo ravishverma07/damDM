@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 from django.utils import timezone
 
+from apps.core import notices
 from apps.core.models import AuditLog
 from apps.core.services import audit
 
@@ -91,6 +92,7 @@ def record_failure(account: ConnectedAccount, exc: GraphAPIError) -> None:
     """Keep the error visible; change status only when the token or permission is gone."""
     account.last_error = str(exc)[:2000]
     fields = ["last_error", "updated_at"]
+    previous = account.status
     if exc.is_token_error:
         account.status = ConnectedAccount.Status.EXPIRED
         fields.append("status")
@@ -98,6 +100,8 @@ def record_failure(account: ConnectedAccount, exc: GraphAPIError) -> None:
         account.status = ConnectedAccount.Status.ERROR
         fields.append("status")
     account.save(update_fields=fields)
+    if account.status != previous:
+        notices.instagram_needs_attention(account)
 
 
 def _upsert_post(account: ConnectedAccount, item: dict) -> bool | None:

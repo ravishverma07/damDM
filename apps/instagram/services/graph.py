@@ -84,6 +84,17 @@ class InstagramGraph:
             query = {**(params or {}), "access_token": self._token}
         return self._request(url, query)
 
+    def post(self, path: str, data: dict | None = None) -> dict:
+        """POST to a Graph path, e.g. ``"me/subscribed_apps"``."""
+        if settings.META_MOCK:
+            return mock_response(path)
+        base = f"{settings.META_GRAPH_BASE_URL}/{settings.META_GRAPH_API_VERSION}"
+        return self._request(
+            f"{base}/{path.lstrip('/')}",
+            {**(data or {}), "access_token": self._token},
+            method="POST",
+        )
+
     def paginate(
         self, path: str, params: dict | None = None, *, max_pages: int = 10
     ) -> Iterator[dict]:
@@ -105,11 +116,14 @@ class InstagramGraph:
             {"grant_type": "ig_refresh_token", "access_token": self._token},
         )
 
-    def _request(self, url: str, params: dict | None) -> dict:
+    def _request(self, url: str, params: dict | None, *, method: str = "GET") -> dict:
         if self._client is None:
             self._client = httpx.Client(timeout=TIMEOUT_SECONDS)
         try:
-            response = self._client.get(url, params=params)
+            if method == "POST":
+                response = self._client.post(url, data=params)
+            else:
+                response = self._client.get(url, params=params)
         except httpx.HTTPError as exc:
             raise GraphAPIError("Couldn't reach Instagram.") from exc
         return _parse(response)

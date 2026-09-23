@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -6,7 +8,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
-from .models import DataDeletionRequest, Notification
+from . import push
+from .models import DataDeletionRequest, Notification, PushSubscription
+from .notify import deliver
 
 
 class LandingView(TemplateView):
@@ -107,3 +111,78 @@ class ManifestView(TemplateView):
 
 def health(request):
     return JsonResponse({"status": "ok"})
+
+
+# --- installable app and push notifications ---------------------------------
+
+class ServiceWorkerView(TemplateView):
+    """Served from the site root so it can control every page."""
+
+    template_name = "pwa/sw.js"
+    content_type = "application/javascript"
+
+    def render_to_response(self, context, **kwargs):
+        response = super().render_to_response(context, **kwargs)
+        response["Service-Worker-Allowed"] = "/"
+        response["Cache-Control"] = "no-cache"
+        return response
+
+
+class OfflineView(TemplateView):
+    template_name = "pwa/offline.html"
+
+
+class _PushView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+    raise_exception = True  # a JSON caller wants 403, not a login redirect
+
+    def payload(self) -> dict:
+        try:
+            data = json.loads(self.request.body or b"{}")
+        except ValueError:
+            return {}
+        return data if isinstance(data, dict) else {}
+
+
+class PushSubscribeView(_PushView):
+    def post(self, request):
+        data = self.payload()
+        keys = data.get("keys") if isinstance(data.get("keys"), dict) else {}
+        endpoint = str(data.get("endpoint") or "")
+        p256dh, auth = str(keys.get("p256dh") or ""), str(keys.get("auth") or "")
+        if not push.is_configured():
+            return JsonResponse({"error": "Push notifications aren't set up."}, status=503)
+        valid_keys = 0 < len(p256dh) <= 200 and 0 < len(auth) <= 64
+        if not (push.is_allowed_endpoint(endpoint) and valid_keys):
+            return JsonResponse({"error": "That subscription isn't valid."}, status=400)
+        PushSubscription.objects.update_or_create(
+            endpoint=endpoint,
+            defaults={
+                "user": request.user,
+                "p256dh": p256dh,
+                "auth": auth,
+                "user_agent": request.headers.get("User-Agent", "")[:300],
+                "failure_count": 0,
+            },
+        )
+        # Remembered so logging out stops this device getting this user's alerts.
+        request.session["push_endpoint"] = endpoint
+        return JsonResponse({"ok": True})
+
+
+class PushUnsubscribeView(_PushView):
+    def post(self, request):
+        endpoint = str(self.payload().get("endpoint") or "")
+        PushSubscription.objects.filter(user=request.user, endpoint=endpoint).delete()
+        return JsonResponse({"ok": True})
+
+
+class PushTestView(_PushView):
+    def post(self, request):
+        sent = deliver(request.user.pk, {
+            "title": "Notifications are on 🎉",
+            "body": "You'll hear from DamDM when something needs your attention.",
+            "url": "/accounts/settings/",
+            "tag": "test",
+        })
+        return JsonResponse({"sent": sent})

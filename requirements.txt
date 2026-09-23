@@ -13,6 +13,8 @@ redis==5.2.1
 # --- HTTP / crypto ---
 httpx==0.28.1
 cryptography==44.0.0
+# Web Push payload encryption (RFC 8291)
+http-ece==1.2.1
 
 # --- Billing ---
 

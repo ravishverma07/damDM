@@ -153,3 +153,27 @@ class Notification(models.Model):
 
     def __str__(self) -> str:
         return f"{self.title} → {self.user_id}"
+
+
+class PushSubscription(models.Model):
+    """A browser or installed app that accepted push notifications."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="push_subscriptions"
+    )
+    endpoint = models.URLField(max_length=1000, unique=True)
+    # The browser's public key and auth secret, used to encrypt each message.
+    p256dh = models.CharField(max_length=200)
+    auth = models.CharField(max_length=64)
+    user_agent = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    failure_count = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "push subscription"
+        verbose_name_plural = "push subscriptions"
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"Push for {self.user_id} ({self.user_agent[:40] or 'browser'})"

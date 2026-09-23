@@ -14,6 +14,16 @@
   <meta name="apple-mobile-web-app-title" content="{{ APP_NAME }}">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  {% if user.is_authenticated %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    {% if VAPID_PUBLIC_KEY %}
+      <meta name="vapid-public-key" content="{{ VAPID_PUBLIC_KEY }}">
+      <meta name="push-subscribe-url" content="{% url 'core:push-subscribe' %}">
+      <meta name="push-unsubscribe-url" content="{% url 'core:push-unsubscribe' %}">
+      <meta name="push-test-url" content="{% url 'core:push-test' %}">
+    {% endif %}
+  {% endif %}
   <script>
     (function () {
       var choice = "system";
@@ -38,6 +48,7 @@
   {% include "partials/seo_head.html" %}
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+  <script src="{% static 'js/pwa.js' %}" defer></script>
   {% block head %}{% endblock %}
 </head>
 <body class="{% if user.is_authenticated %}layout-app{% else %}layout-site{% endif %}">

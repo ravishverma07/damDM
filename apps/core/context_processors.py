@@ -2,6 +2,8 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.urls import reverse
 
+from . import push
+
 
 def app_meta(request):
     """Expose product identity to every template."""
@@ -15,12 +17,22 @@ def app_meta(request):
         "BUSINESS_LEGAL_NAME": settings.BUSINESS_LEGAL_NAME,
         "SUPPORT_EMAIL": settings.SUPPORT_EMAIL,
         "PRIVACY_EMAIL": settings.PRIVACY_EMAIL,
+        "VAPID_PUBLIC_KEY": push.public_key(),
         "PLAN_PRICE": settings.PLAN_PRICE,
+        # Rupees, for the checkout page; blank when the trial costs nothing.
+        "TRIAL_UPFRONT_DISPLAY": _rupees(settings.TRIAL_UPFRONT_AMOUNT),
         "PLAN_LIST_PRICE": settings.PLAN_LIST_PRICE,
         "PLAN_DISCOUNT_PERCENT": _discount_percent(settings.PLAN_PRICE, settings.PLAN_LIST_PRICE),
         "SUPPORT_PHONE": settings.SUPPORT_PHONE,
         "BUSINESS_ADDRESS": settings.BUSINESS_ADDRESS,
     }
+
+
+def _rupees(paise: int) -> str:
+    if paise <= 0:
+        return ""
+    amount = paise / 100
+    return f"{amount:.0f}" if amount == int(amount) else f"{amount:.2f}"
 
 
 def _discount_percent(price: int, list_price: int) -> int:

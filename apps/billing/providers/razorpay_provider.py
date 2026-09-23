@@ -76,6 +76,14 @@ class RazorpayBillingProvider(BillingProvider):
         }
         if start_at:
             body["start_at"] = int(start_at.timestamp())
+            # Charged when the mandate is approved, in place of Razorpay's own
+            # refundable verification amount.
+            if settings.TRIAL_UPFRONT_AMOUNT > 0:
+                body["addons"] = [{"item": {
+                    "name": f"{settings.APP_NAME} trial activation",
+                    "amount": settings.TRIAL_UPFRONT_AMOUNT,
+                    "currency": plan.currency,
+                }}]
         if offer_id:
             body["offer_id"] = offer_id
         return self.state_from_entity(self._request("POST", "/subscriptions", body))

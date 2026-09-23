@@ -7,6 +7,7 @@ caller decides what to do with the resulting identity.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
@@ -15,6 +16,8 @@ import httpx
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+
+logger = logging.getLogger("damdm.instagram")
 
 TOKEN_URL = "https://api.instagram.com/oauth/access_token"
 PROFILE_FIELDS = "id,user_id,username,name,account_type,profile_picture_url,followers_count"
@@ -27,6 +30,12 @@ MOCK_APP_SCOPED_ID = "mock-app-scoped-id"
 
 
 class InstagramOAuthError(Exception):
+    """Carries Instagram's own reason in ``detail`` for the audit log."""
+
+    def __init__(self, message: str, detail: str = ""):
+        super().__init__(message)
+        self.detail = detail
+
     """Instagram sign-in failed. The message is safe to show to the user."""
 
 
@@ -151,7 +160,18 @@ def _scopes(permissions) -> tuple[str, ...]:
 
 def _json(response: httpx.Response) -> dict:
     if response.status_code != 200:
-        raise InstagramOAuthError("Instagram rejected the sign-in. Please try again.")
+        # Instagram's own reason (no secrets in it) makes setup mistakes obvious.
+        try:
+            detail = response.json()
+        except ValueError:
+            detail = {"body": response.text[:200]}
+        logger.warning(
+            "Instagram returned HTTP %s for %s: %s",
+            response.status_code, response.request.url.path if response.request else "", detail,
+        )
+        raise InstagramOAuthError(
+            "Instagram rejected the sign-in. Please try again.", detail=str(detail)[:400]
+        )
     try:
         return response.json()
     except ValueError as exc:

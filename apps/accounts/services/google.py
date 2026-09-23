@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import time
 from dataclasses import dataclass
 from urllib.parse import urlencode
@@ -23,6 +24,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.urls import reverse
 from django.utils.crypto import constant_time_compare, salted_hmac
+
+logger = logging.getLogger("damdm.accounts")
 
 AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -263,6 +266,18 @@ def _b64decode(value: str) -> bytes:
 
 def _json(response: httpx.Response) -> dict:
     if response.status_code != 200:
+        # Google's reason (e.g. invalid_client) helps diagnose setup mistakes; it holds no secrets.
+        try:
+            detail = response.json()
+        except ValueError:
+            detail = {}
+        logger.warning(
+            "Google returned HTTP %s for %s: %s %s",
+            response.status_code,
+            response.request.url.path if response.request else "",
+            detail.get("error", ""),
+            detail.get("error_description", ""),
+        )
         raise GoogleOAuthError("Google rejected the sign-in. Please try again.")
     try:
         return response.json()
